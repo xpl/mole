@@ -94,7 +94,7 @@
                         console.log (e) }
 
                     if (!this.audioContext) {
-                        alert ('Sorry but your browser does not support HTML5 audio :('); return }
+                        alert ('Sorry but your browser does not support HTML5 audio :(\n\nSo imagine it\'s a deaf mole simulator :)'); return }
 
                     _.each ([1,2,3,4], function (i) {
                         try {
@@ -136,11 +136,12 @@
             var keyToSound = { 'w': 3, 'a': 1, 's': 2, 'd': 4 }
 
             _.preventsDefault = function (fn) { return function (e) {
-                fn (e)
-                if (e) { e.preventDefault () }
-                return false } }
+                if (fn (e) === false) { e.preventDefault (); return false } } }
 
             $(document).ready (function () {
+
+                if (!Sounds.audioContext) {
+                    $('.main-menu h1').text ('Deaf Mole Simulator') }
 
                 document.body.style.webkitTransform = 'translate3d(0,0,0)'
 
@@ -152,12 +153,25 @@
 
                 var keyDown = {}
 
+                var lastKeysPressed = []
+                var wasEntered = function (s) {
+                    return (s === _.last (lastKeysPressed, s.length).join ('')) }
+
                 $(document).keydown (_.preventsDefault (function (e) { if (!keyDown[e.keyCode]) { keyDown[e.keyCode] = true
+                   
+                    lastKeysPressed.push (String.fromCharCode (e.keyCode).lowercase)
+
+                    if (wasEntered ('speed')) {
+                        window.open ('http://lurkmore.to/%D0%9A%D0%BE%D0%BF%D0%B8%D0%BF%D0%B0%D1%81%D1%82%D0%B0:%D0%A1%D0%BF%D0%B8%D0%B4_%D0%B8%D0%B7_%D0%BA%D1%80%D0%BE%D1%82%D0%B0') }
+                    
                     if (e.keyCode == 27) {
-                        $('.main-menu').toggleVisibility (true) }
+                        $('.main-menu').toggleVisibility (true)
+                        return false }
+
                     else if (e.keyCode in wasd) {
                             $('.controls .' + wasd[e.keyCode]).addClass ('pressed')
-                            Sounds.play (keyToSound[wasd[e.keyCode]]) } } }))
+                            Sounds.play (keyToSound[wasd[e.keyCode]])
+                            return false } } }))
 
                 $(document).keyup (_.preventsDefault (function (e) { keyDown[e.keyCode] = false
                     if (e.keyCode in wasd) {
