@@ -1,0 +1,21 @@
+{
+  "name": "mole-sim",
+  "version": "0.0.1",
+  "description": "Mole Simulator",
+  "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xpl/mole.git"
+  },
+  "author": "Vitaly Gordon <rocket.mind@gmail.com> (http://github.com/xpl)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/xpl/mole/issues"
+  },
+  "homepage": "https://github.com/xpl/mole#readme",
+  "dependencies": {
+    "underscore": ">= 1.8.3",
+    "process": ">= 0.9.0",
+    "iconv": ">= 2.1.7"
+  }
+}
