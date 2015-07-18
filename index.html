@@ -76,7 +76,6 @@
             .notice { font-size: 60px; color: rgba(255,255,255,0.5); }
 
             .notice.active { -webkit-animation: notice 5s linear; animation: notice 5s linear; }
-
         </style>
 
         <script>
@@ -86,8 +85,19 @@
                 audioContext: undefined,
                 samples: [],
 
-                audioFormat: $property (function () {
+                preferredAudioFormat: $property (function () {
                     return (navigator.userAgent.indexOf ('OPR') < 0) ? 'mp3' : 'ogg' }),
+
+                loadSample: function (i, fmt, decodeFailure) {
+                    try {
+                        Http.loadFile ('sound/' + i + '.' + fmt, {
+                            success: this.$ (function (response) {                  console.log ('Loaded sample',  i, fmt)
+                                this.audioContext.decodeAudioData (response,
+                                    this.$ (function (sample) {                     console.log ('Decoded sample', i, fmt)
+                                        this.samples[i] = sample }),
+                                    this.$ (decodeFailure)) }) }) }
+                    catch (e) {
+                        console.log (e) } },
 
                 constructor: function () {
 
@@ -100,13 +110,9 @@
                         alert ('Sorry but your browser does not support HTML5 audio :(\n\nSo imagine it\'s a deaf mole simulator :)'); return }
 
                     _.each ([1,2,3,4], function (i) {
-                        try {
-                            Http.loadFile ('sound/' + i + '.' + this.audioFormat, {
-                                success: this.$ (function (response) {                                       console.log ('Loaded sample ',  i)
-                                    this.audioContext.decodeAudioData (response, this.$ (function (sample) { console.log ('Decoded sample ', i)
-                                        this.samples[i] = sample })) }) }) }
-                        catch (e) {
-                            console.log (e) } }, this) },
+                        this.loadSample (i, this.preferredAudioFormat, function () {
+                            this.loadSample (i, 'ogg', function () {
+                                console.log ('Failed to decode sample', i) }) }) }, this) },
 
                 play: function (i) {
                     if (this.samples[i]) {
@@ -121,6 +127,7 @@
                     else {
                         console.log ('no sample', i) } }
             })
+
 
             $.fn.extend ({
                 notify: function () {
