@@ -135,6 +135,11 @@
             var wasd = { 87: 'w', 65: 'a', 83: 's', 68: 'd' }
             var keyToSound = { 'w': 3, 'a': 1, 's': 2, 'd': 4 }
 
+            _.preventsDefault = function (fn) { return function (e) {
+                fn (e)
+                if (e) { e.preventDefault () }
+                return false } }
+
             $(document).ready (function () {
 
                 document.body.style.webkitTransform = 'translate3d(0,0,0)'
@@ -147,16 +152,16 @@
 
                 var keyDown = {}
 
-                $(document).keydown (function (e) { if (!keyDown[e.keyCode]) { keyDown[e.keyCode] = true
+                $(document).keydown (_.preventsDefault (function (e) { if (!keyDown[e.keyCode]) { keyDown[e.keyCode] = true
                     if (e.keyCode == 27) {
                         $('.main-menu').toggleVisibility (true) }
                     else if (e.keyCode in wasd) {
                             $('.controls .' + wasd[e.keyCode]).addClass ('pressed')
-                            Sounds.play (keyToSound[wasd[e.keyCode]]) } } })
+                            Sounds.play (keyToSound[wasd[e.keyCode]]) } } }))
 
-                $(document).keyup (function (e) { keyDown[e.keyCode] = false
+                $(document).keyup (_.preventsDefault (function (e) { keyDown[e.keyCode] = false
                     if (e.keyCode in wasd) {
-                        $('.controls .' + wasd[e.keyCode]).removeClass ('pressed') } })
+                        $('.controls .' + wasd[e.keyCode]).removeClass ('pressed') } }))
 
                 $('.main-menu').toggleVisibility (true)
 
