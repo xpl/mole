@@ -1,188 +1,188 @@
 <html>
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
-		<title>Mole Simulator</title>
+        <title>Mole Simulator</title>
 
-		<link rel="shortcut icon" href="http://www.gameniacgames.com/uploads/2/7/2/1/2721050/mole.ico">
-		<link rel="stylesheet" href="node_modules/useless/client/UI.error.css" type="text/css">
+        <link rel="shortcut icon" href="http://www.gameniacgames.com/uploads/2/7/2/1/2721050/mole.ico">
+        <link rel="stylesheet" href="node_modules/useless/client/UI.error.css" type="text/css">
 
-		<script src="jquery-2.0.3.min.js"></script>
-		<script src="node_modules/underscore/underscore-min.js"></script>
-		<script src="node_modules/useless/build/useless.micro.min.js"></script>
-		<!--<script src="node_modules/useless/build/useless.min.js"></script>-->
+        <script src="jquery-2.0.3.min.js"></script>
+        <script src="node_modules/underscore/underscore-min.js"></script>
+        <script src="node_modules/useless/build/useless.micro.min.js"></script>
+        <!--<script src="node_modules/useless/build/useless.min.js"></script>-->
 
-		<script src="node_modules/useless/client/API.js"></script>
-		<!--<script src="node_modules/useless/client/jQueryPlus.js"></script>
-		<script src="node_modules/useless/client/UI.error.js"></script>
-		<script src="node_modules/useless/client/boot.js"></script>-->
+        <script src="node_modules/useless/client/API.js"></script>
+        <!--<script src="node_modules/useless/client/jQueryPlus.js"></script>
+        <script src="node_modules/useless/client/UI.error.js"></script>
+        <script src="node_modules/useless/client/boot.js"></script>-->
 
-		<style type="text/css">
+        <style type="text/css">
 
-			@keyframes appear {
-			    0%    { transform: scale(0.9); opacity: 0; }
-			    100%  { transform: scale(1); opacity: 1; } }
+            @keyframes appear {
+                0%    { transform: scale(0.9); opacity: 0; }
+                100%  { transform: scale(1); opacity: 1; } }
 
-			@-webkit-keyframes appear {
-			    0%    { -webkit-transform: scale(0.9); opacity: 0; }
-			    100%  { -webkit-transform: scale(1); opacity: 1; } }
+            @-webkit-keyframes appear {
+                0%    { -webkit-transform: scale(0.9); opacity: 0; }
+                100%  { -webkit-transform: scale(1); opacity: 1; } }
 
-			@keyframes notice {
-			    0%    { transform: scale(0.9); opacity: 0; }
-			    50%   { transform: scale(1);   opacity: 1; }
-			    100%  { transform: scale(1.1); opacity: 0; } }
+            @keyframes notice {
+                0%    { transform: scale(0.9); opacity: 0; }
+                50%   { transform: scale(1);   opacity: 1; }
+                100%  { transform: scale(1.1); opacity: 0; } }
 
-			@-webkit-keyframes notice {
-			    0%    { -webkit-transform: scale(0.9); opacity: 0; }
-			    50%   { -webkit-transform: scale(1);   opacity: 1; }
-			    100%  { -webkit-transform: scale(1.1); opacity: 0; } }
+            @-webkit-keyframes notice {
+                0%    { -webkit-transform: scale(0.9); opacity: 0; }
+                50%   { -webkit-transform: scale(1);   opacity: 1; }
+                100%  { -webkit-transform: scale(1.1); opacity: 0; } }
 
-			* { -webkit-animation-fill-mode: forwards; animation-fill-mode: forwards;
-				cursor: default; -webkit-user-select: none; -moz-user-select: none; user-select: none; }
+            * { -webkit-animation-fill-mode: forwards; animation-fill-mode: forwards;
+                cursor: default; -webkit-user-select: none; -moz-user-select: none; user-select: none; }
 
-			body { width: 100%; height: 100%; box-sizing: border-box; overflow: hidden; background: black; color: white; font-family: Helvetica, sans-serif; position: relative; padding: 0; margin: 0; }
+            body { width: 100%; height: 100%; box-sizing: border-box; overflow: hidden; background: black; color: white; font-family: Helvetica, sans-serif; position: relative; padding: 0; margin: 0; }
 
-			.center { position: absolute; left: 0; top: 0; right: 0; bottom: 0; text-align: center; }
-			.center { display: -ms-flexbox; display: -moz-flex; display: -webkit-flex; display: flex;
-					  -ms-flex-direction: column; -moz-flex-direction: column; -webkit-flex-direction: column; flex-direction: column;
-					  -ms-align-items: center; -moz-align-items: center; -webkit-align-items: center; align-items: center;
-					  -ms-flex-pack: center; -ms-align-content: center; -moz-align-content: center; -webkit-align-content: center; align-content: center;
-					  -ms-justify-content: center; -moz-justify-content: center; -webkit-justify-content: center; justify-content: center; }
+            .center { position: absolute; left: 0; top: 0; right: 0; bottom: 0; text-align: center; }
+            .center { display: -ms-flexbox; display: -moz-flex; display: -webkit-flex; display: flex;
+                      -ms-flex-direction: column; -moz-flex-direction: column; -webkit-flex-direction: column; flex-direction: column;
+                      -ms-align-items: center; -moz-align-items: center; -webkit-align-items: center; align-items: center;
+                      -ms-flex-pack: center; -ms-align-content: center; -moz-align-content: center; -webkit-align-content: center; align-content: center;
+                      -ms-justify-content: center; -moz-justify-content: center; -webkit-justify-content: center; justify-content: center; }
 
-			.appear { pointer-events: none;
-					  -webkit-animation: appear 1s ease-out; animation: appear 1s ease-out;  }
+            .appear { pointer-events: none;
+                      -webkit-animation: appear 1s ease-out; animation: appear 1s ease-out;  }
 
-			.disappear { pointer-events: none;
-						 -webkit-animation: appear 1s ease-in; animation: appear 1s ease-in;
-						 -webkit-animation-direction: reverse; animation-direction: reverse; }
+            .disappear { pointer-events: none;
+                         -webkit-animation: appear 1s ease-in; animation: appear 1s ease-in;
+                         -webkit-animation-direction: reverse; animation-direction: reverse; }
 
-			.main-menu h1 { margin-top: -1em; font-size: 50px; letter-spacing: -2px; margin-bottom: 20px; }
-			.main-menu a { display: block; padding: 20px; transform: scale(1); cursor: pointer; color: white; text-decoration: none; }
+            .main-menu h1 { margin-top: -1em; font-size: 50px; letter-spacing: -2px; margin-bottom: 20px; }
+            .main-menu a { display: block; padding: 20px; transform: scale(1); cursor: pointer; color: white; text-decoration: none; }
 
-			.main-menu a.play { opacity: 0.5; font-size: 40px; }
-			.main-menu a.exit { opacity: 0.25; font-size: 30px; }
+            .main-menu a.play { opacity: 0.5; font-size: 40px; }
+            .main-menu a.exit { opacity: 0.25; font-size: 30px; }
 
-			.controls { text-align: center; position: absolute; left: 0; bottom: 0; padding: 50px; }
+            .controls { text-align: center; position: absolute; left: 0; bottom: 0; padding: 50px; }
 
-			.controls .key { 	cursor: pointer; display: inline-block; width: 50px; height: 50px; margin: 5px;
-							  	box-sizing: border-box; border: 1px solid white; border-radius: 5px;
-							  	text-align: center; line-height: 50px; opacity: 0.5; color: white; text-decoration: none; }
+            .controls .key {    cursor: pointer; display: inline-block; width: 50px; height: 50px; margin: 5px;
+                                box-sizing: border-box; border: 1px solid white; border-radius: 5px;
+                                text-align: center; line-height: 50px; opacity: 0.5; color: white; text-decoration: none; }
 
-			.btn { transition: all 0.1s ease-in-out; -webkit-transform: scale(1); transform: scale(1); }
-			.btn.pressed,
-			html:not(.touch) .btn:hover { opacity: 1 !important; -webkit-transform: scale(1.1); transform: scale(1.1); }
+            .btn { transition: all 0.1s ease-in-out; -webkit-transform: scale(1); transform: scale(1); }
+            .btn.pressed,
+            html:not(.touch) .btn:hover { opacity: 1 !important; -webkit-transform: scale(1.1); transform: scale(1.1); }
 
-			.notice { font-size: 60px; color: rgba(255,255,255,0.5); }
+            .notice { font-size: 60px; color: rgba(255,255,255,0.5); }
 
-			.notice.active { -webkit-animation: notice 5s linear; animation: notice 5s linear; }
+            .notice.active { -webkit-animation: notice 5s linear; animation: notice 5s linear; }
 
-		</style>
+        </style>
 
-		<script>
+        <script>
 
-			Sounds = $singleton ({
+            Sounds = $singleton ({
 
-				audioContext: undefined,
-				samples: [],
+                audioContext: undefined,
+                samples: [],
 
-				constructor: function () {
+                constructor: function () {
 
-					try {
-				    	this.audioContext = new (window.AudioContext || window.webkitAudioContext) () }
-				    catch (e) {
-				    	console.log (e) }
+                    try {
+                        this.audioContext = new (window.AudioContext || window.webkitAudioContext) () }
+                    catch (e) {
+                        console.log (e) }
 
-				    if (!this.audioContext) {
-				    	alert ('Sorry but your browser does not support HTML5 audio :('); return }
+                    if (!this.audioContext) {
+                        alert ('Sorry but your browser does not support HTML5 audio :('); return }
 
-					_.each ([1,2,3,4], function (i) {
-						try {
-							Http.loadFile ('sound/' + i + '.mp3', {
-								success: this.$ (function (response) {
-									this.audioContext.decodeAudioData (response, this.$ (function (sample) {
-										console.log ('Loaded sample ', i)
-										this.samples[i] = sample })) }) }) }
-						catch (e) {
-							console.log (e) } }, this) },
+                    _.each ([1,2,3,4], function (i) {
+                        try {
+                            Http.loadFile ('sound/' + i + '.mp3', {
+                                success: this.$ (function (response) {
+                                    this.audioContext.decodeAudioData (response, this.$ (function (sample) {
+                                        console.log ('Loaded sample ', i)
+                                        this.samples[i] = sample })) }) }) }
+                        catch (e) {
+                            console.log (e) } }, this) },
 
-				play: function (i) {
-					if (this.samples[i]) {
-						var sourceNode = this.audioContext.createBufferSource ()
-						var gainNode = this.audioContext.createGain ()
+                play: function (i) {
+                    if (this.samples[i]) {
+                        var sourceNode = this.audioContext.createBufferSource ()
+                        var gainNode = this.audioContext.createGain ()
 
-						gainNode.connect (this.audioContext.destination)
+                        gainNode.connect (this.audioContext.destination)
 
-						sourceNode.buffer = this.samples[i]
-						sourceNode.connect (gainNode)
-						sourceNode.start (0) }
-					else {
-						console.log ('no sample', i) } }
-			})
+                        sourceNode.buffer = this.samples[i]
+                        sourceNode.connect (gainNode)
+                        sourceNode.start (0) }
+                    else {
+                        console.log ('no sample', i) } }
+            })
 
-			$.fn.extend ({
-				notify: function () {
-					this.css ('display', '')
-					this.animateWith ('active', function () { this.css ('display', 'none') }) },
+            $.fn.extend ({
+                notify: function () {
+                    this.css ('display', '')
+                    this.animateWith ('active', function () { this.css ('display', 'none') }) },
 
-			    toggleVisibility: function (yes) { yes = (yes === undefined) ? true : yes
-			        if (yes) {
-			            this.css ('display', '') }
-			        this.animateWith (yes ? 'appear' : 'disappear', function () {
-			            if (!yes) {
-			                this.css ('display', 'none') } }) } })
+                toggleVisibility: function (yes) { yes = (yes === undefined) ? true : yes
+                    if (yes) {
+                        this.css ('display', '') }
+                    this.animateWith (yes ? 'appear' : 'disappear', function () {
+                        if (!yes) {
+                            this.css ('display', 'none') } }) } })
 
-			var wasd = { 87: 'w', 65: 'a', 83: 's', 68: 'd' }
-			var keyToSound = { 'w': 3, 'a': 1, 's': 2, 'd': 4 }
+            var wasd = { 87: 'w', 65: 'a', 83: 's', 68: 'd' }
+            var keyToSound = { 'w': 3, 'a': 1, 's': 2, 'd': 4 }
 
-			$(document).ready (function () {
+            $(document).ready (function () {
 
-				document.body.style.webkitTransform = 'translate3d(0,0,0)'
+                document.body.style.webkitTransform = 'translate3d(0,0,0)'
 
-				$('.main-menu .play').click (function () {
-					$('.main-menu').toggleVisibility (false)
-					$('.controls').toggleVisibility (true)
-					if (Sounds.audioContext) {
-						$('.sound-notice').notify () } })
+                $('.main-menu .play').click (function () {
+                    $('.main-menu').toggleVisibility (false)
+                    $('.controls').toggleVisibility (true)
+                    if (Sounds.audioContext) {
+                        $('.sound-notice').notify () } })
 
-				var keyDown = {}
+                var keyDown = {}
 
-				$(document).keydown (function (e) { if (!keyDown[e.keyCode]) { keyDown[e.keyCode] = true
-					if (e.keyCode == 27) {
-						$('.main-menu').toggleVisibility (true) }
-					else if (e.keyCode in wasd) {
-							$('.controls .' + wasd[e.keyCode]).addClass ('pressed')
-							Sounds.play (keyToSound[wasd[e.keyCode]]) } } })
+                $(document).keydown (function (e) { if (!keyDown[e.keyCode]) { keyDown[e.keyCode] = true
+                    if (e.keyCode == 27) {
+                        $('.main-menu').toggleVisibility (true) }
+                    else if (e.keyCode in wasd) {
+                            $('.controls .' + wasd[e.keyCode]).addClass ('pressed')
+                            Sounds.play (keyToSound[wasd[e.keyCode]]) } } })
 
-				$(document).keyup (function (e) { keyDown[e.keyCode] = false
-					if (e.keyCode in wasd) {
-						$('.controls .' + wasd[e.keyCode]).removeClass ('pressed') } })
+                $(document).keyup (function (e) { keyDown[e.keyCode] = false
+                    if (e.keyCode in wasd) {
+                        $('.controls .' + wasd[e.keyCode]).removeClass ('pressed') } })
 
-				$('.main-menu').toggleVisibility (true)
+                $('.main-menu').toggleVisibility (true)
 
-				if (Platform.touch) {
-					$('.controls .key')
+                if (Platform.touch) {
+                    $('.controls .key')
 
-						.on ('touchstart', function (e) { $(e.delegateTarget).addClass ('pressed');
-														  Sounds.play (keyToSound[$(e.delegateTarget).attr ('data-key')]) })
+                        .on ('touchstart', function (e) { $(e.delegateTarget).addClass ('pressed');
+                                                          Sounds.play (keyToSound[$(e.delegateTarget).attr ('data-key')]) })
 
-						.on ('touchend',   function (e) { $(e.delegateTarget).removeClass ('pressed') }) }
-				else {
-					$('.controls .key').mousedown (function (e) {
-						Sounds.play (keyToSound[$(e.delegateTarget).attr ('data-key')]) }) } })
+                        .on ('touchend',   function (e) { $(e.delegateTarget).removeClass ('pressed') }) }
+                else {
+                    $('.controls .key').mousedown (function (e) {
+                        Sounds.play (keyToSound[$(e.delegateTarget).attr ('data-key')]) }) } })
 
-		</script>
-	</head>
-	<body class="menu">
-		<div class="main-menu center" style="display:none;">
-			<h1>Mole Simulator</h1>
-			<a class="btn play" href="javascript:{}">Play</a>
-			<a class="btn exit" href="http://pestkill.org/wp-content/uploads/HowtoGetRidofMolesinYard.jpg">Exit</a>
-		</div>
-		<div class="sound-notice notice center" style="display:none;">Turn speakers on</div>
-		<div class="controls" style="display:none;">
-			<div><div class="btn key w" data-key="w">W</div></div>
-			<div><div class="btn key a" data-key="a">A</div><div class="btn key s" data-key="s">S</div><div class="btn key d" data-key="d">D</div></div>
-		</div>
-	</body>
+        </script>
+    </head>
+    <body class="menu">
+        <div class="main-menu center" style="display:none;">
+            <h1>Mole Simulator</h1>
+            <a class="btn play" href="javascript:{}">Play</a>
+            <a class="btn exit" href="http://pestkill.org/wp-content/uploads/HowtoGetRidofMolesinYard.jpg">Exit</a>
+        </div>
+        <div class="sound-notice notice center" style="display:none;">Turn speakers on</div>
+        <div class="controls" style="display:none;">
+            <div><div class="btn key w" data-key="w">W</div></div>
+            <div><div class="btn key a" data-key="a">A</div><div class="btn key s" data-key="s">S</div><div class="btn key d" data-key="d">D</div></div>
+        </div>
+    </body>
 </html>
