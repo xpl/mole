@@ -44,11 +44,11 @@
 			body { width: 100%; height: 100%; box-sizing: border-box; overflow: hidden; background: black; color: white; font-family: Helvetica, sans-serif; position: relative; padding: 0; margin: 0; }
 
 			.center { position: absolute; left: 0; top: 0; right: 0; bottom: 0; text-align: center; }
-			.center { display: -moz-flex; display: -webkit-flex; display: flex;
-					  -moz-flex-direction: column; -webkit-flex-direction: column; flex-direction: column;
-					  -moz-align-items: center; -webkit-align-items: center; align-items: center;
-					  -moz-align-content: center; -webkit-align-content: center; align-content: center;
-					  -moz-justify-content: center; -webkit-justify-content: center; justify-content: center; }
+			.center { display: -ms-flexbox; display: -moz-flex; display: -webkit-flex; display: flex;
+					  -ms-flex-direction: column; -moz-flex-direction: column; -webkit-flex-direction: column; flex-direction: column;
+					  -ms-align-items: center; -moz-align-items: center; -webkit-align-items: center; align-items: center;
+					  -ms-flex-pack: center; -ms-align-content: center; -moz-align-content: center; -webkit-align-content: center; align-content: center;
+					  -ms-justify-content: center; -moz-justify-content: center; -webkit-justify-content: center; justify-content: center; }
 
 			.appear { pointer-events: none;
 					  -webkit-animation: appear 1s ease-out; animation: appear 1s ease-out;  }
@@ -58,7 +58,7 @@
 						 -webkit-animation-direction: reverse; animation-direction: reverse; }
 
 			.main-menu h1 { margin-top: -1em; font-size: 50px; letter-spacing: -2px; margin-bottom: 20px; }
-			.main-menu a { padding: 20px; transform: scale(1); cursor: pointer; color: white; text-decoration: none; }
+			.main-menu a { display: block; padding: 20px; transform: scale(1); cursor: pointer; color: white; text-decoration: none; }
 
 			.main-menu a.play { opacity: 0.5; font-size: 40px; }
 			.main-menu a.exit { opacity: 0.25; font-size: 30px; }
@@ -81,7 +81,7 @@
 
 		<script>
 
-			Sounds = $singleton (Component, {
+			Sounds = $singleton ({
 
 				audioContext: undefined,
 				samples: [],
@@ -90,12 +90,16 @@
 				    if (!(this.audioContext = new (window.AudioContext || window.webkitAudioContext) ())) {
 				    	alert ('HTML5 audio not supported') }
 
-					_.each ([1,2,3,4], function (i) {
-						Http.loadFile ('sound/' + i + '.mp3', {
-							success: this.$ (function (response) {
-								this.audioContext.decodeAudioData (response, this.$ (function (sample) {
-									console.log ('Loaded sample ', i)
-									this.samples[i] = sample })) }) }) }, this) },
+				    try {
+						_.each ([1,2,3,4], function (i) {
+							
+								Http.loadFile ('sound/' + i + '.mp3', {
+									success: this.$ (function (response) {
+										this.audioContext.decodeAudioData (response, this.$ (function (sample) {
+											console.log ('Loaded sample ', i)
+											this.samples[i] = sample })) }) }) }, this) }
+					catch (e) {
+						console.log (e) } },
 
 				play: function (i) {
 					if (this.samples[i]) {
