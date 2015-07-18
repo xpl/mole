@@ -88,18 +88,23 @@
 
 				constructor: function () {
 
-				    if (!(this.audioContext = new (window.AudioContext || window.webkitAudioContext) ())) {
-				    	alert ('HTML5 audio not supported') }
+					try {
+				    	this.audioContext = new (window.AudioContext || window.webkitAudioContext) () }
+				    catch (e) {
+				    	console.log (e) }
 
-						_.each ([1,2,3,4], function (i) {
-							try {
-								Http.loadFile ('sound/' + i + '.mp3', {
-									success: this.$ (function (response) {
-										this.audioContext.decodeAudioData (response, this.$ (function (sample) {
-											console.log ('Loaded sample ', i)
-											this.samples[i] = sample })) }) }) }
-							catch (e) {
-								console.log (e) } }, this) },
+				    if (!this.audioContext) {
+				    	alert ('Sorry but your browser does not support HTML5 audio :('); return }
+
+					_.each ([1,2,3,4], function (i) {
+						try {
+							Http.loadFile ('sound/' + i + '.mp3', {
+								success: this.$ (function (response) {
+									this.audioContext.decodeAudioData (response, this.$ (function (sample) {
+										console.log ('Loaded sample ', i)
+										this.samples[i] = sample })) }) }) }
+						catch (e) {
+							console.log (e) } }, this) },
 
 				play: function (i) {
 					if (this.samples[i]) {
@@ -137,7 +142,8 @@
 				$('.main-menu .play').click (function () {
 					$('.main-menu').toggleVisibility (false)
 					$('.controls').toggleVisibility (true)
-					$('.sound-notice').notify () })
+					if (Sounds.audioContext) {
+						$('.sound-notice').notify () } })
 
 				var keyDown = {}
 
