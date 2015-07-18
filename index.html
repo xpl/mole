@@ -40,14 +40,14 @@
 			* { -webkit-animation-fill-mode: forwards; animation-fill-mode: forwards;
 				cursor: default; -webkit-user-select: none; -moz-user-select: none; user-select: none; }
 
-			body { background: black; color: white; font-family: Helvetica, sans-serif; position: relative; padding: 0; margin: 0; }
+			body { width: 100%; height: 100%; box-sizing: border-box; overflow: hidden; background: black; color: white; font-family: Helvetica, sans-serif; position: relative; padding: 0; margin: 0; }
 
 			.center { position: absolute; left: 0; top: 0; right: 0; bottom: 0; text-align: center; }
-			.center { display: -webkit-flex; display: flex;
-					  -webkit-flex-direction: column; flex-direction: column;
-					  -webkit-align-items: center; align-items: center;
-					  -webkit-align-content: center; align-content: center;
-					  -webkit-justify-content: center; justify-content: center; }
+			.center { display: -moz-flex; display: -webkit-flex; display: flex;
+					  -moz-flex-direction: column; -webkit-flex-direction: column; flex-direction: column;
+					  -moz-align-items: center; -webkit-align-items: center; align-items: center;
+					  -moz-align-content: center; -webkit-align-content: center; align-content: center;
+					  -moz-justify-content: center; -webkit-justify-content: center; justify-content: center; }
 
 			.appear { pointer-events: none;
 					  -webkit-animation: appear 1s ease-out; animation: appear 1s ease-out;  }
