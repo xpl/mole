@@ -149,13 +149,17 @@
 
 				$('.main-menu').toggleVisibility (true)
 
-				$('.controls .key')
+				if (Platform.touch) {
+					$('.controls .key')
 
-					.on ('touchstart', function (e) { $(e.delegateTarget).addClass ('pressed');
-													  Sounds.play (keyToSound[$(e.delegateTarget).attr ('data-key')]) })
+						.on ('touchstart', function (e) { $(e.delegateTarget).addClass ('pressed');
+														  Sounds.play (keyToSound[$(e.delegateTarget).attr ('data-key')]) })
 
-					.on ('touchend',   function (e) { $(e.delegateTarget).removeClass ('pressed') })
-			})
+						.on ('touchend',   function (e) { $(e.delegateTarget).removeClass ('pressed') }) }
+				else {
+					$('.controls .key').mousedown (function (e) {
+						Sounds.play (keyToSound[$(e.delegateTarget).attr ('data-key')]) }) } })
+
 		</script>
 	</head>
 	<body class="menu">
