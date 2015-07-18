@@ -86,7 +86,8 @@
 				audioContext: undefined,
 				samples: [],
 
-				init: function () {
+				constructor: function () {
+
 				    if (!(this.audioContext = new (window.AudioContext || window.webkitAudioContext) ())) {
 				    	alert ('HTML5 audio not supported') }
 
