@@ -86,6 +86,9 @@
                 audioContext: undefined,
                 samples: [],
 
+                audioFormat: $property (function () {
+                    return (navigator.userAgent.indexOf ('OPR') < 0) ? 'mp3' : 'ogg' }),
+
                 constructor: function () {
 
                     try {
@@ -98,10 +101,9 @@
 
                     _.each ([1,2,3,4], function (i) {
                         try {
-                            Http.loadFile ('sound/' + i + '.mp3', {
-                                success: this.$ (function (response) {
-                                    this.audioContext.decodeAudioData (response, this.$ (function (sample) {
-                                        console.log ('Loaded sample ', i)
+                            Http.loadFile ('sound/' + i + '.' + this.audioFormat, {
+                                success: this.$ (function (response) {                                       console.log ('Loaded sample ',  i)
+                                    this.audioContext.decodeAudioData (response, this.$ (function (sample) { console.log ('Decoded sample ', i)
                                         this.samples[i] = sample })) }) }) }
                         catch (e) {
                             console.log (e) } }, this) },
