@@ -108,9 +108,13 @@
 			.enable-audio { position: absolute; opacity: 0.4; right: 80px; display: inline-block; padding: 10px; }
 			.enable-audio i { position: relative; top: 2px; left: -2px; }
 
-			.enable-audio.active:after { content: ' disable mic'; }
-			.enable-audio:not(.active):after { content: ' enable mic'; }
-			.enable-audio.wait:after { content: ' wait...'; }
+			.enable-audio.active .text:before { content: ' disable mic'; }
+			.enable-audio:not(.active) .text:before { content: ' enable mic'; }
+			.enable-audio.wait .text:before { content: ' wait...'; }
+
+			.enable-audio .users { opacity: 0.5; }
+			.enable-audio .users:before { content: ' ('; }
+			.enable-audio .users:after { content: ' users)'; }
 
 			.btn.wait { pointer-events: none; }
 
@@ -200,15 +204,22 @@
 
 						this.skylink.on ('peerLeft', this.$ (function (peerId, peerInfo, isSelf) {
 							this.addMessage ('left', 'left the game', peerId, peerInfo, isSelf)
-  							if (isSelf) {
-  								/*$('.chat').toggleVisibility (false)*/ } }))
 
-						this.skylink.on ('incomingStream', function (peerId, stream, isSelf) {
+  							if (isSelf) {
+  								/*$('.chat').toggleVisibility (false)*/ }
+                            else {
+                                $('#' + peerId).remove ()
+                                this.updateAudioUsersCount () } }))
+
+						this.skylink.on ('incomingStream', this.$ (function (peerId, stream, isSelf) {
 							if (!isSelf) {
-								var vid = $('<video style="pointer-events:none; position:absolute;" style="transform: rotateY(-180deg);" autoplay>')
-												.attr ('id', peerId)
-												.appendTo (document.body)
-								attachMediaStream (vid[0], stream) } })
+								var vid = $('<video style="pointer-events:none; transform: rotateY(-180deg);" autoplay>')
+            									.attr ('id', peerId)
+            									.appendTo (document.body)
+
+								this.updateAudioUsersCount ()
+
+								attachMediaStream (vid[0], stream) } }))
 
   						this.skylink.on ('incomingMessage', this.$ (function (message, peerId, peerInfo, isSelf) {
   							var sys = this.parseSystemMessage (message.content)
@@ -219,6 +230,11 @@
 	  						else {
 								this.addMessage ('message', message.content, peerId, peerInfo, isSelf) } })) }))
 				},
+
+                updateAudioUsersCount: function () {
+                    $('.enable-audio .users')
+                        .text ($('video').length)
+                        .css ('display', $('video').length ? '' : 'none') },
 
 				parseSystemMessage: function (text) {
 					var parsed = text.match (/^###(.+)/)
@@ -339,7 +355,7 @@
         <div class="chat" style="display:none;">
         	<div class="block messages"></div>
         	<div class="block input">
-        		<input type="text" placeholder="Team speak"></input> <a href="javascript:{}" class="btn enable-audio"><i class="fa fa-microphone"></i></a>
+        		<input type="text" placeholder="Team speak"></input> <a href="javascript:{}" class="btn enable-audio"><i class="fa fa-microphone"></i><span class="text"></span><span class="users" style="display:none;"></span></a>
         	</div>
         </div>
     </body>
