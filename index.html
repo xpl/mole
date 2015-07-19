@@ -202,7 +202,9 @@
                 currentProtocolVersion: $property (1337),
 
                 saveHistory: function () {
-                    window.localStorage.setItem ('heestory', _.json ({ messages: this.history })) },
+                    this.history = _.last (this.history, 50)
+                    window.localStorage.setItem ('heestory', _.json ({ messages: this.history }))
+                    this.skylink.setUserData (_.extend (this.userData, { history: this.history })) },
 
                 renderHistory: function () {
                     var el = $('.chat .messages').empty ()
@@ -223,7 +225,7 @@
 
                     this.skylink.init ({ apiKey: 'd9d1464c-c07a-427a-91a2-4ef5f75cf667' }, this.$ (function () {
                     
-                    this.skylink.setUserData ({
+                    this.skylink.setUserData (this.userData = {
                         protocolVersion: this.currentProtocolVersion,
                         history: this.history,
                         name: window.localStorage.getItem ('nick') || ('mole_' + Format.randomHexString (3)) })
@@ -303,9 +305,7 @@
 
                         $('.peer.id' + peerId).animateWith ('disappear', function () { $(this).remove () })
 
-                        if (isSelf) {
-                            /*$('.chat').toggleVisibility (false)*/ }
-                        else {
+                        if (!isSelf) {
                             $('#' + peerId).remove ()
                             this.updateAudioUsersCount () } }))
 
