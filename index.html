@@ -262,14 +262,14 @@
  
                             console.log (name, 'has', peerHistory.length, 'messages')
 
-                            var concatHistory = this.history.concat (peerHistory)
+                            /*var concatHistory = this.history.concat (peerHistory)
                             var mergedHistory = _.uniq (_.sortBy (concatHistory, _.property ('when')), true, _.property ('when'))
 
                             if (mergedHistory.length > this.history.length) {
                                 console.log ('merged', mergedHistory.length - this.history.length, 'messages from', name)
                                 this.history = mergedHistory
                                 this.renderHistory ()
-                                this.saveHistory () }
+                                this.saveHistory () }*/
 
                             $('<div class="peer">')
                                 .append ('<i class="fa fa-user-secret"></i>')
