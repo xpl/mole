@@ -197,109 +197,135 @@
 
                 initialized: false,
                 peers: {},
+                history: [],
+
+                saveHistory: function () {
+                    window.localStorage.setItem ('history', _.json ({ messages: this.history })) },
+
+                renderHistory: function () {
+                    var el = $('.chat .messages').empty ()
+                    el.append (_.map (this.history, this.$ (this.renderMessage))) },
 
                 init: function () {
+
+                    this.history = (_.json (window.localStorage.getItem ('history')) || {}).messages || []
+
+                    this.renderHistory ()
 
                     this.skylink = new Skylink ()
 
                     this.skylink.init ({ apiKey: 'd9d1464c-c07a-427a-91a2-4ef5f75cf667' }, this.$ (function () {
-                        this.skylink.setUserData ({ name: window.localStorage.getItem ('nick') || ('mole_' + Format.randomHexString (3)) })
-                        this.skylink.joinRoom ({ audio: false, video: false }) }))
+                    
+                    this.skylink.setUserData ({
+                        history: this.history,
+                        name: window.localStorage.getItem ('nick') || ('mole_' + Format.randomHexString (3)) })
 
-                    $(document).ready (this.$ (function () {
+                    this.skylink.joinRoom ({ audio: false, video: false }) }))
 
-                        $('.enable-audio').touchClick (this.$ (function (e) { var btn = $(e.delegateTarget)
-                            btn.addClass ('wait')
-                            $('.peers').addClass ('wait')
-                            var yes = !(btn.hasClass ('active') || false)
-                            this.skylink.joinRoom ({ audio: yes, video: false }, function () {
-                                $('.peers').removeClass ('wait')
-                                $(e.delegateTarget).removeClass ('wait').toggleClass ('active', yes) }) }))
+                    $('.enable-audio').touchClick (this.$ (function (e) { var btn = $(e.delegateTarget)
+                        btn.addClass ('wait')
+                        $('.peers').addClass ('wait')
+                        var yes = !(btn.hasClass ('active') || false)
+                        this.skylink.joinRoom ({ audio: yes, video: false }, function () {
+                            $('.peers').removeClass ('wait')
+                            $(e.delegateTarget).removeClass ('wait').toggleClass ('active', yes) }) }))
 
-                        $('.chat input').keydown (this.$ (function (e) {
-                            if (e.keyCode === 13) { var text = e.delegateTarget.value
-                                if ((text || '').trimmed.length) {
-                                    if (text.lowercase === 'speed') {
-                                        speedEntered () }
-                                    else {
-                                        this.sendMessage (text)
-                                        e.delegateTarget.value = '' } } } }))
+                    $('.chat input').keydown (this.$ (function (e) {
+                        if (e.keyCode === 13) { var text = e.delegateTarget.value
+                            if ((text || '').trimmed.length) {
+                                if (text.lowercase === 'speed') {
+                                    speedEntered () }
+                                else {
+                                    this.sendMessage (text)
+                                    e.delegateTarget.value = '' } } } }))
 
-                        $('.chat-help').touchClick (this.$ (function () {
-                            this.addMessage ('help', '\nAvailable commands:\n\n/nick new_nick\n/me something\n\n') }))
+                    $('.chat-help').touchClick (this.$ (function () {
+                        this.addMessage ('help', '\nAvailable commands:\n\n/nick new_nick\n/me something\n\n') }))
 
-                        this.skylink.on ('peerJoined', this.$ (function (peerId, peerInfo, isSelf) {
+                    this.skylink.on ('peerJoined', this.$ (function (peerId, peerInfo, isSelf) {
 
-                            this.peers[peerId] = _.cloneDeep (peerInfo)
+                        this.peers[peerId] = _.cloneDeep (peerInfo)
 
-                            if (isSelf) {
-                                $('.chat').toggleVisibility (true)
-                                $('.peers').toggleVisibility (true)
-                                this.initialized = true }
-                            else {
-                               $('<div class="peer">')
-                                    .append ('<i class="fa fa-user-secret"></i>')
-                                    .addClass ('id' + peerId)
-                                    .append ($('<span class="name">').text ((peerInfo.userData && peerInfo.userData.name) || peerId))
-                                    .appendTo ('.peers')
-                                    .animateWith ('appear') } }))
+                        var since = (peerInfo.userData && peerInfo.userData.since) || Date.now ()
 
-                        this.skylink.on ('peerUpdated', this.$ (function (peerId, peerInfo, isSelf) {
+                        if (isSelf) {
+                            $('.chat').toggleVisibility (true)
+                            $('.peers').toggleVisibility (true)
+                            this.initialized = true }
+                        else {
 
-                            var oldPeer = this.peers[peerId]
-                            if (oldPeer) {
-                                var oldName = (oldPeer .userData && oldPeer .userData.name) || peerId
-                                var newName = (peerInfo.userData && peerInfo.userData.name) || peerId
-                                if (oldName !== newName) {
-                                    this.addMessage ('nick-change', 'changed nick to ' + newName, peerId, oldPeer, isSelf)
-                                    $('.peer.id' + peerId + ' .name').text (newName) } }
+                            var concatHistory = this.history.concat ((peerInfo.userData && peerInfo.userData.history) || [])
+                            var mergedHistory = _.uniq (_.sortBy (concatHistory, _.property ('when')), true, _.property ('when'))
 
-                            this.peers[peerId] = _.cloneDeep (peerInfo) }))
+                            if (mergedHistory.length > this.history.length) {
+                                this.history = mergedHistory
+                                this.renderHistory ()
+                                this.saveHistory () }
 
-                        this.skylink.on ('peerLeft', this.$ (function (peerId, peerInfo, isSelf) {
+                            $('<div class="peer">')
+                                .append ('<i class="fa fa-user-secret"></i>')
+                                .addClass ('id' + peerId)
+                                .append ($('<span class="name">').text ((peerInfo.userData && peerInfo.userData.name) || peerId))
+                                .appendTo ('.peers')
+                                .animateWith ('appear') } }))
 
-                            delete this.peers[peerId]
+                    this.skylink.on ('peerUpdated', this.$ (function (peerId, peerInfo, isSelf) {
 
-                            $('.peer.id' + peerId).animateWith ('disappear', function () { $(this).remove () })
+                        var oldPeer = this.peers[peerId]
+                        if (oldPeer) {
+                            var oldName = (oldPeer .userData && oldPeer .userData.name) || peerId
+                            var newName = (peerInfo.userData && peerInfo.userData.name) || peerId
+                            if (oldName !== newName) {
+                                this.addMessage ('nick-change', 'changed nick to ' + newName, oldName, true)
+                                $('.peer.id' + peerId + ' .name').text (newName) } }
 
-                            if (isSelf) {
-                                /*$('.chat').toggleVisibility (false)*/ }
-                            else {
-                                $('#' + peerId).remove ()
-                                this.updateAudioUsersCount () } }))
+                        this.peers[peerId] = _.cloneDeep (peerInfo) }))
 
-                        this.skylink.on ('incomingStream', this.$ (function (peerId, stream, isSelf) {
-                            if (!isSelf) {
-                                var vid = $('<video style="pointer-events:none; transform: rotateY(-180deg);" autoplay>')
-                                                .attr ('id', peerId)
-                                                .appendTo (document.body)
+                    this.skylink.on ('peerLeft', this.$ (function (peerId, peerInfo, isSelf) {
 
-                                this.updateAudioUsersCount ()
+                        delete this.peers[peerId]
 
-                                $('.peer.id' + peerId + ' i').attr ('class', 'fa fa-microphone')
+                        $('.peer.id' + peerId).animateWith ('disappear', function () { $(this).remove () })
 
-                                attachMediaStream (vid[0], stream) } }))
+                        if (isSelf) {
+                            /*$('.chat').toggleVisibility (false)*/ }
+                        else {
+                            $('#' + peerId).remove ()
+                            this.updateAudioUsersCount () } }))
 
-                        this.skylink.on ('incomingMessage', this.$ (function (message, peerId, peerInfo, isSelf) {
-                            var sys = this.parseSystemMessage (message.content)
-                            if (sys) {
-                                if (sys.noise) {
-                                    if (!isSelf) {
-                                        Sounds.play (sys.noise, 0.5) } }
-                                else if (sys.me) {
-                                    this.addMessage ('me', sys.me, peerId, peerInfo, isSelf) } }
-                            else {
-                                this.addMessage ('message', message.content, peerId, peerInfo, isSelf) } })) }))
+                    this.skylink.on ('incomingStream', this.$ (function (peerId, stream, isSelf) {
+                        if (!isSelf) {
+                            var vid = $('<video style="pointer-events:none; transform: rotateY(-180deg);" autoplay>')
+                                            .attr ('id', peerId)
+                                            .appendTo (document.body)
+
+                            this.updateAudioUsersCount ()
+
+                            $('.peer.id' + peerId + ' i').attr ('class', 'fa fa-microphone')
+
+                            attachMediaStream (vid[0], stream) } }))
+
+                    this.skylink.on ('incomingMessage', this.$ (function (message, peerId, peerInfo, isSelf) {
+                        var sys = this.parseSystemMessage (message.content)
+                        var name = this.peerName (peerId, peerInfo)
+                        if (sys) {
+                            if (sys.noise) {
+                                if (!isSelf) {
+                                    Sounds.play (sys.noise, 0.5) } }
+                            else if (sys.me) {
+                                this.addMessage ('me', sys.me, name, true) } }
+                        else {
+                            this.addMessage ('message', message.content, name, true) } }))
+                },
+
+                loadChatHistory: function () {
+                    this.sendSystemMessage ({ handshakeRequest: true })
                 },
 
                 updateAudioUsersCount: function () {
                     $('.enable-audio .users')
                         .text ($('video').length)
                         .css ('display', $('video').length ? '' : 'none') },
-
-                parseSystemMessage: function (text) {
-                    var parsed = text.match (/^###(.+)/)
-                    return parsed && _.json (parsed[1]) },
 
                 sendMessage: function (text) {
                     var cmd = text.match (/^\/([^\s]+)\s(.+)$/)
@@ -314,21 +340,33 @@
                     else {
                         this.skylink.sendP2PMessage (text) } },
 
-                sendSystemMessage: function (obj) {
-                    return this.skylink.sendP2PMessage ('###' + _.json (obj)) },
+                parseSystemMessage: function (text) {
+                    var parsed = text.match (/^###(.+)/)
+                    return parsed && _.json (parsed[1]) },
+
+                sendSystemMessage: function (obj, peerId) { var str = '###' + _.json (obj)
+                    return peerId ?
+                        this.skylink.sendP2PMessage (str, peerId) :
+                        this.skylink.sendP2PMessage (str) },
 
                 sendNoise: function (i) {
                     this.sendSystemMessage ({ noise: i }) },
 
-                addMessage: function (action, what, peerId, peerInfo, isSelf) {
+                peerName: function (peerId, peerInfo) {
+                    return (peerInfo && peerInfo.userData && peerInfo.userData.name) || peerId || '' },
+
+                renderMessage: function (msg) {
+                    return $('<div class="entry">')
+                        .addClass (msg.action)
+                        .append ($('<span class="who">').text (msg.who || ''))
+                        .append ($('<span class="what">').html ((msg.what || '').escaped.replace (/\n/g, '<br>'))) },
+
+                addMessage: function (action, what, who, log) { var msg = { when: Date.now (), action: action, what: what, who: who }
+                    if (log) {
+                        this.history.push (msg)
+                        this.saveHistory () }
                     $('.chat .messages')
-                        .append ($('<div class="entry">')
-                            .addClass (action)
-                            .append ($('<span class="who">')
-                                .toggleClass ('self', isSelf || false)
-                                .text ((peerInfo && peerInfo.userData && peerInfo.userData.name) || peerId || ''))
-                            .append ($('<span class="what">')
-                                .html ((what || '').escaped.replace (/\n/g, '<br>')))) }
+                        .append (this.renderMessage (msg)) }
             })
 
 
