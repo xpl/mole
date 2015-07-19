@@ -123,8 +123,10 @@
 
             .btn.wait { pointer-events: none; }
 
-            .peers { position: absolute; top: 60px; right: 80px; opacity: 0.25; text-align: right; }
+            .peers { font-size: 20px; position: absolute; top: 60px; right: 80px; text-align: right; }
+            .peers .peer { opacity: 0.25; }
             .peers .peer i { margin-right: 4px; position: relative; top: 1px; }
+            .peers:empty:before { opacity: 0.25; content: 'Nobody\'s here :('; }
         </style>
 
         <script>
@@ -213,6 +215,7 @@
                         this.skylink.on ('peerJoined', this.$ (function (peerId, peerInfo, isSelf) {
                             if (isSelf) {
                                 $('.chat').toggleVisibility (true)
+                                $('.peers').toggleVisibility (true)
                                 this.initialized = true }
                             else {
                                 $('.peers').append ($('<div class="peer">')
@@ -377,7 +380,6 @@
                 <input type="text" placeholder="Team speak"></input> <a href="javascript:{}" class="btn enable-audio"><i class="fa fa-microphone"></i><span class="text"></span><span class="users" style="display:none;"></span></a>
             </div>
         </div>
-        <div class="peers">
-        </div>
+        <div class="peers" style="display:none;"></div>
     </body>
 </html>
