@@ -187,6 +187,7 @@
             Chat = $singleton ({
 
                 initialized: false,
+                peers: {},
 
                 init: function () {
 
@@ -212,10 +213,13 @@
                                     if (text.lowercase === 'speed') {
                                         speedEntered () }
                                     else {
-                                        this.skylink.sendP2PMessage (text)
+                                        this.sendMessage (text)
                                         e.delegateTarget.value = '' } } } }))
 
                         this.skylink.on ('peerJoined', this.$ (function (peerId, peerInfo, isSelf) {
+
+                            this.peers[peerId] = _.cloneDeep (peerInfo)
+
                             if (isSelf) {
                                 $('.chat').toggleVisibility (true)
                                 $('.peers').toggleVisibility (true)
@@ -228,7 +232,21 @@
                                     .appendTo ('.peers')
                                     .animateWith ('appear') } }))
 
+                        this.skylink.on ('peerUpdated', this.$ (function (peerId, peerInfo, isSelf) {
+
+                            var oldPeer = this.peers[peerId]
+                            if (oldPeer) {
+                                var oldName = (oldPeer .userData && oldPeer .userData.name) || peerId
+                                var newName = (peerInfo.userData && peerInfo.userData.name) || peerId
+                                if (oldName !== newName) {
+                                    this.addMessage ('nick-change', 'changed nick to ' + newName, peerId, oldPeer, isSelf)
+                                    $('.peer.id' + peerId + ' .name').text (newName) } }
+
+                            this.peers[peerId] = _.cloneDeep (peerInfo) }))
+
                         this.skylink.on ('peerLeft', this.$ (function (peerId, peerInfo, isSelf) {
+
+                            delete this.peers[peerId]
 
                             $('.peer.id' + peerId).animateWith ('disappear', function () { $(this).remove () })
 
@@ -253,9 +271,11 @@
                         this.skylink.on ('incomingMessage', this.$ (function (message, peerId, peerInfo, isSelf) {
                             var sys = this.parseSystemMessage (message.content)
                             if (sys) {
-                                if (!isSelf) {
-                                    if (sys.noise) {
-                                        Sounds.play (sys.noise, 0.5) } } }
+                                if (sys.noise) {
+                                    if (!isSelf) {
+                                        Sounds.play (sys.noise, 0.5) } }
+                                else if (sys.me) {
+                                    this.addMessage ('me', sys.me, peerId, peerInfo, isSelf) } }
                             else {
                                 this.addMessage ('message', message.content, peerId, peerInfo, isSelf) } })) }))
                 },
@@ -269,6 +289,18 @@
                     var parsed = text.match (/^###(.+)/)
                     return parsed && _.json (parsed[1]) },
 
+                sendMessage: function (text) {
+                    var cmd = text.match (/^\/(.+)\s(.+)$/)
+                    if (cmd) {
+                        if (cmd[1] === 'nick') { var nick = cmd[2].trimmed
+                            if (nick.length > 0) {
+                                this.skylink.setUserData ({ name: nick }) } }
+
+                        else if (cmd[1] === 'me') {
+                            this.sendSystemMessage ({ me: cmd[2] }) } }
+                    else {
+                        this.skylink.sendP2PMessage (text) } },
+
                 sendSystemMessage: function (obj) {
                     return this.skylink.sendP2PMessage ('###' + _.json (obj)) },
 
@@ -281,7 +313,7 @@
                             .addClass (action)
                             .append ($('<span class="who">')
                                 .toggleClass ('self', isSelf || false)
-                                .text (isSelf ? 'You' : ((peerInfo.userData && peerInfo.userData.name) || peerId)))
+                                .text ((peerInfo.userData && peerInfo.userData.name) || peerId))
                             .append ($('<span class="what">')
                                 .text (what))) }
             })
