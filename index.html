@@ -194,7 +194,7 @@
                     this.skylink = new Skylink ()
 
                     this.skylink.init ({ apiKey: 'd9d1464c-c07a-427a-91a2-4ef5f75cf667' }, this.$ (function () {
-                        this.skylink.setUserData ({ name: 'mole_' + Format.randomHexString (3) })
+                        this.skylink.setUserData ({ name: window.localStorage.getItem ('nick') || ('mole_' + Format.randomHexString (3)) })
                         this.skylink.joinRoom ({ audio: false, video: false }) }))
 
                     $(document).ready (this.$ (function () {
@@ -294,6 +294,7 @@
                     if (cmd) {
                         if (cmd[1] === 'nick') { var nick = cmd[2].trimmed
                             if (nick.length > 0) {
+                                window.localStorage.setItem ('nick', nick)
                                 this.skylink.setUserData ({ name: nick }) } }
 
                         else if (cmd[1] === 'me') {
