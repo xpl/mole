@@ -4,3 +4,6 @@
 [submodule "node_modules/underscore"]
 	path = node_modules/underscore
 	url = https://github.com/jashkenas/underscore
+[submodule "node_modules/SkylinkJS"]
+	path = node_modules/SkylinkJS
+	url = https://github.com/Temasys/SkylinkJS

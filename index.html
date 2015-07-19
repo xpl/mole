@@ -18,6 +18,8 @@
         <script src="node_modules/useless/client/UI.error.js"></script>
         <script src="node_modules/useless/client/boot.js"></script>-->
 
+    	<script src="node_modules/SkylinkJS/publish/skylink.complete.min.js"></script>
+
         <style type="text/css">
 
             @keyframes appear {
@@ -76,6 +78,27 @@
             .notice { font-size: 60px; color: rgba(255,255,255,0.5); }
 
             .notice.active { -webkit-animation: notice 5s linear; animation: notice 5s linear; }
+
+            .chat { position: absolute; left: 300px; right: 0; bottom: 60px; height: 200px; font-size: 20px; }
+            .chat input { background: none; border: none; color: white; cursor: text; padding: 10px 0; font-size: 20px; }
+            .chat .input:before { content: '>'; position: absolute; top: 10px; right: 100%; opacity: 0.4; margin-right: 10px; }
+
+            .chat .messages { width: 100%; position: absolute; bottom: 50px; }
+			.chat .input { width: 100%; position: absolute; bottom: 0; }
+			.chat input { width: 400px; max-width: 100%; }
+
+			.chat .entry { opacity: 0.25; }
+			.chat .entry.message { opacity: 0.5; }
+
+			.chat .entry.message .who { opacity: 0.5; position: absolute; right: 100%; margin-right: 5px;}
+
+			.chat .entry         .who:after { content: ' ' ; }
+			.chat .entry.message .who:after { content: ': '; }
+
+			::-webkit-input-placeholder { color: white; opacity: 0.25; }
+			::-moz-placeholder { color: white; opacity: 0.25; }
+			:-ms-input-placeholder { color: white; opacity: 0.25; }
+			input:-moz-placeholder { color: white; opacity: 0.25; }
         </style>
 
         <script>
@@ -128,6 +151,48 @@
                         console.log ('no sample', i) } }
             })
 
+			Chat = $singleton ({
+
+				init: function () {
+
+					this.skylink = new Skylink ()
+
+					this.skylink.init ({ apiKey: '04f62cde-2773-4d0e-b749-e7aaf81a74eb' }, this.$ (function () {
+						this.skylink.setUserData ({ name: 'mole_' + Format.randomHexString (3) })
+						this.skylink.joinRoom ({ audio: false, video: false }) }))
+
+					$(document).ready (this.$ (function () {
+
+						$('.chat input').keydown (this.$ (function (e) {
+							if (e.keyCode === 13) {
+								this.skylink.sendP2PMessage (e.delegateTarget.value)
+								e.delegateTarget.value = '' } }))
+
+						this.skylink.on ('peerJoined', this.$ (function (peerId, peerInfo, isSelf) {
+							this.addMessage ('join', 'joined the game', peerId, peerInfo, isSelf)
+							if (isSelf) {
+								$('.chat').toggleVisibility (true) } }))
+
+						this.skylink.on ('peerLeft', this.$ (function (peerId, peerInfo, isSelf) {
+							this.addMessage ('left', 'left the game', peerId, peerInfo, isSelf)
+  							if (isSelf) {
+  								$('.chat').toggleVisibility (false) } }))
+
+  						this.skylink.on ('incomingMessage', this.$ (function (message, peerId, peerInfo, isSelf) {
+							this.addMessage ('message', message.content, peerId, peerInfo, isSelf) })) }))
+				},
+
+				addMessage: function (action, what, peerId, peerInfo, isSelf) {
+					$('.chat .messages')
+						.append ($('<div class="entry">')
+							.addClass (action)
+							.append ($('<span class="who">')
+								.toggleClass ('self', isSelf || false)
+								.text (isSelf ? 'You' : peerInfo.userData.name || peerId))
+							.append ($('<span class="what">')
+								.text (what))) }
+			})
+
 
             $.fn.extend ({
                 notify: function () {
@@ -155,10 +220,13 @@
                 document.body.style.webkitTransform = 'translate3d(0,0,0)'
 
                 $('.main-menu .play').click (function () {
+
                     $('.main-menu').toggleVisibility (false)
                     $('.controls').toggleVisibility (true)
                     if (Sounds.audioContext) {
-                        $('.sound-notice').notify () } })
+                        $('.sound-notice').notify () }
+                        
+                    Chat.init () })
 
                 var keyDown = {}
 
@@ -167,6 +235,9 @@
                     return (s === _.last (lastKeysPressed, s.length).join ('')) }
 
                 $(document).keydown (_.preventsDefault (function (e) { if (!keyDown[e.keyCode]) { keyDown[e.keyCode] = true
+
+                	if ($('.chat input').is (':focus')) {
+                		return }
                    
                     lastKeysPressed.push (String.fromCharCode (e.keyCode).lowercase)
 
@@ -211,6 +282,12 @@
         <div class="controls" style="display:none;">
             <div><div class="btn key w" data-key="w">W</div></div>
             <div><div class="btn key a" data-key="a">A</div><div class="btn key s" data-key="s">S</div><div class="btn key d" data-key="d">D</div></div>
+        </div>
+        <div class="chat" style="display:none;">
+        	<div class="block messages"></div>
+        	<div class="block input">
+        		<input type="text" placeholder="Team speak"></input>
+        	</div>
         </div>
     </body>
 </html>
