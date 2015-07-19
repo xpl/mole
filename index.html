@@ -209,17 +209,18 @@
                                         e.delegateTarget.value = '' } } } }))
 
                         this.skylink.on ('peerJoined', this.$ (function (peerId, peerInfo, isSelf) {
-                            this.addMessage ('join', 'joined the game', peerId, peerInfo, isSelf)
                             if (isSelf) {
                                 $('.chat').toggleVisibility (true)
-                                this.initialized = true } }))
+                                this.initialized = true }
+                            else {
+                                this.addMessage ('join', 'joined the game', peerId, peerInfo, isSelf) } }))
 
                         this.skylink.on ('peerLeft', this.$ (function (peerId, peerInfo, isSelf) {
-                            this.addMessage ('left', 'left the game', peerId, peerInfo, isSelf)
 
                             if (isSelf) {
                                 /*$('.chat').toggleVisibility (false)*/ }
                             else {
+                                this.addMessage ('left', 'left the game', peerId, peerInfo, isSelf)
                                 $('#' + peerId).remove ()
                                 this.updateAudioUsersCount () } }))
 
