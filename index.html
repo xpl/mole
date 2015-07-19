@@ -115,7 +115,7 @@
 
             .input .btn.chat-help { opacity: 0.25; }
             .input .btn.chat-help i { top: 1px; }
-            
+
             .input .buttons { position: absolute; display: inline-block; right: 80px; }
 
             .enable-audio.active .text:before { content: ' disable mic'; }
@@ -301,7 +301,7 @@
                     return parsed && _.json (parsed[1]) },
 
                 sendMessage: function (text) {
-                    var cmd = text.match (/^\/(.+)\s(.+)$/)
+                    var cmd = text.match (/^\/([^\s]+)\s(.+)$/)
                     if (cmd) {
                         if (cmd[1] === 'nick') { var nick = cmd[2].trimmed
                             if (nick.length > 0) {
