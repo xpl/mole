@@ -258,6 +258,7 @@
                             var mergedHistory = _.uniq (_.sortBy (concatHistory, _.property ('when')), true, _.property ('when'))
 
                             if (mergedHistory.length > this.history.length) {
+                                console.log ('merged', mergedHistory.length - this.history.length, 'messages')
                                 this.history = mergedHistory
                                 this.renderHistory ()
                                 this.saveHistory () }
