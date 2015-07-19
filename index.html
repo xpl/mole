@@ -110,8 +110,13 @@
             :-ms-input-placeholder { color: white; opacity: 0.25; }
             input:-moz-placeholder { color: white; opacity: 0.25; }
 
-            .enable-audio { position: absolute; opacity: 0.4; right: 80px; display: inline-block; padding: 10px; }
-            .enable-audio i { position: relative; top: 2px; left: -1px; }
+            .input .btn { margin-left: 20px; opacity: 0.4; inline-block; height: 50px; box-sizing: border-box; line-height: 50px; }
+            .input .btn i { position: relative; top: 2px; left: -1px; }
+
+            .input .btn.chat-help { opacity: 0.25; }
+            .input .btn.chat-help i { top: 1px; }
+            
+            .input .buttons { position: absolute; display: inline-block; right: 80px; }
 
             .enable-audio.active .text:before { content: ' disable mic'; }
             .enable-audio:not(.active) .text:before { content: ' enable mic'; }
@@ -128,6 +133,9 @@
             .peers .peer i { display: inline-block; width: 25px; text-align: center; opacity: 0.25; position: relative; top: 1px; }
             .peers .peer i.fa-microphone { opacity: 0.5; }
             .peers:not(.wait):empty:before { opacity: 0.25; content: 'Nobody\'s here :('; }
+
+            .messages, .peers { pointer-events: none; }
+            .controls { z-index: 2; }
         </style>
 
         <script>
@@ -215,6 +223,9 @@
                                     else {
                                         this.sendMessage (text)
                                         e.delegateTarget.value = '' } } } }))
+
+                        $('.chat-help').touchClick (this.$ (function () {
+                            this.addMessage ('help', '\nAvailable commands:\n\n/nick new_nick\n/me something\n\n') }))
 
                         this.skylink.on ('peerJoined', this.$ (function (peerId, peerInfo, isSelf) {
 
@@ -314,9 +325,9 @@
                             .addClass (action)
                             .append ($('<span class="who">')
                                 .toggleClass ('self', isSelf || false)
-                                .text ((peerInfo.userData && peerInfo.userData.name) || peerId))
+                                .text ((peerInfo && peerInfo.userData && peerInfo.userData.name) || peerId || ''))
                             .append ($('<span class="what">')
-                                .text (what))) }
+                                .html ((what || '').escaped.replace (/\n/g, '<br>')))) }
             })
 
 
@@ -417,7 +428,11 @@
         <div class="chat" style="display:none;">
             <div class="block messages"></div>
             <div class="block input">
-                <input type="text" placeholder="Team speak"></input> <a href="javascript:{}" class="btn enable-audio"><i class="fa fa-microphone"></i><span class="text"></span><span class="users" style="display:none;"></span></a>
+                <input type="text" placeholder="Team speak"></input>
+                <div class="buttons">
+                    <a href="javascript:{}" class="btn chat-help"><i class="fa fa-question"></i>&nbsp;</a>
+                    <a href="javascript:{}" class="btn enable-audio"><i class="fa fa-microphone"></i><span class="text"></span><span class="users" style="display:none;"></span></a>
+                </div>
             </div>
         </div>
         <div class="peers" style="display:none;"></div>
