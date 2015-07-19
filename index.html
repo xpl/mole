@@ -19,6 +19,7 @@
         <script src="node_modules/useless/client/boot.js"></script>-->
 
     	<script src="node_modules/SkylinkJS/publish/skylink.complete.min.js"></script>
+    	<script src="http://cdn.temasys.com.sg/adapterjs/0.11.x/adapter.min.js"></script>
 
         <style type="text/css">
 
@@ -198,6 +199,13 @@
 							this.addMessage ('left', 'left the game', peerId, peerInfo, isSelf)
   							if (isSelf) {
   								/*$('.chat').toggleVisibility (false)*/ } }))
+
+						this.skylink.on ('incomingStream', function (peerId, stream, isSelf) {
+							if (!isSelf) {
+								var vid = $('<video style="pointer-events:none; position:absolute;" style="transform: rotateY(-180deg);" autoplay>')
+												.attr ('id', peerId)
+												.appendTo (document.body)
+								attachMediaStream (vid[0], stream) } })
 
   						this.skylink.on ('incomingMessage', this.$ (function (message, peerId, peerInfo, isSelf) {
   							var sys = this.parseSystemMessage (message.content)
