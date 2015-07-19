@@ -254,14 +254,14 @@
                             this.initialized = true }
                         else {
 
-                            var concatHistory = this.history.concat ((peerInfo.userData && peerInfo.userData.history) || [])
+                            /*var concatHistory = this.history.concat ((peerInfo.userData && peerInfo.userData.history) || [])
                             var mergedHistory = _.uniq (_.sortBy (concatHistory, _.property ('when')), true, _.property ('when'))
 
                             if (mergedHistory.length > this.history.length) {
                                 console.log ('merged', mergedHistory.length - this.history.length, 'messages')
                                 this.history = mergedHistory
                                 this.renderHistory ()
-                                this.saveHistory () }
+                                this.saveHistory () }*/
 
                             $('<div class="peer">')
                                 .append ('<i class="fa fa-user-secret"></i>')
