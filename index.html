@@ -111,7 +111,7 @@
             input:-moz-placeholder { color: white; opacity: 0.25; }
 
             .enable-audio { position: absolute; opacity: 0.4; right: 80px; display: inline-block; padding: 10px; }
-            .enable-audio i { position: relative; top: 2px; left: -2px; }
+            .enable-audio i { position: relative; top: 2px; left: -1px; }
 
             .enable-audio.active .text:before { content: ' disable mic'; }
             .enable-audio:not(.active) .text:before { content: ' enable mic'; }
@@ -125,7 +125,7 @@
 
             .peers { font-size: 20px; position: absolute; top: 60px; right: 80px; text-align: right; }
             .peers .peer .name { opacity: 0.25; }
-            .peers .peer i { opacity: 0.25; margin-right: 5px; position: relative; top: 1px; }
+            .peers .peer i { display: inline-block; width: 25px; text-align: center; opacity: 0.25; position: relative; top: 1px; }
             .peers .peer i.fa-microphone { opacity: 0.5; }
             .peers:not(.wait):empty:before { opacity: 0.25; content: 'Nobody\'s here :('; }
         </style>
@@ -221,14 +221,16 @@
                                 $('.peers').toggleVisibility (true)
                                 this.initialized = true }
                             else {
-                                $('.peers').append ($('<div class="peer">')
+                               $('<div class="peer">')
                                     .append ('<i class="fa fa-user-secret"></i>')
                                     .addClass ('id' + peerId)
-                                    .append ($('<span class="name">').text ((peerInfo.userData && peerInfo.userData.name) || peerId))) } }))
+                                    .append ($('<span class="name">').text ((peerInfo.userData && peerInfo.userData.name) || peerId))
+                                    .appendTo ('.peers')
+                                    .animateWith ('appear') } }))
 
                         this.skylink.on ('peerLeft', this.$ (function (peerId, peerInfo, isSelf) {
 
-                            $('.peer.id' + peerId).remove ()
+                            $('.peer.id' + peerId).animateWith ('disappear', function () { $(this).remove () })
 
                             if (isSelf) {
                                 /*$('.chat').toggleVisibility (false)*/ }
