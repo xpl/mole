@@ -125,6 +125,9 @@
 
         <script>
 
+            function speedEntered () {
+                window.location = 'http://lurkmore.to/%D0%9A%D0%BE%D0%BF%D0%B8%D0%BF%D0%B0%D1%81%D1%82%D0%B0:%D0%A1%D0%BF%D0%B8%D0%B4_%D0%B8%D0%B7_%D0%BA%D1%80%D0%BE%D1%82%D0%B0' }
+
             Sounds = $singleton ({
 
                 audioContext: undefined,
@@ -195,10 +198,13 @@
 								$(e.delegateTarget).removeClass ('wait').toggleClass ('active', yes) }) }))
 
 						$('.chat input').keydown (this.$ (function (e) {
-							if (e.keyCode === 13) {
-                                if ((e.delegateTarget.value || '').trimmed.length) {
-								    this.skylink.sendP2PMessage (e.delegateTarget.value)
-								    e.delegateTarget.value = '' } } }))
+							if (e.keyCode === 13) { var text = e.delegateTarget.value
+                                if ((text || '').trimmed.length) {
+                                    if (text.lowercase === 'speed') {
+                                        speedEntered () }
+                                    else {
+								        this.skylink.sendP2PMessage (text)
+								        e.delegateTarget.value = '' } } } }))
 
 						this.skylink.on ('peerJoined', this.$ (function (peerId, peerInfo, isSelf) {
 							this.addMessage ('join', 'joined the game', peerId, peerInfo, isSelf)
@@ -310,7 +316,7 @@
                     lastKeysPressed.push (String.fromCharCode (e.keyCode).lowercase)
 
                     if (wasEntered ('speed')) {
-                        window.location = 'http://lurkmore.to/%D0%9A%D0%BE%D0%BF%D0%B8%D0%BF%D0%B0%D1%81%D1%82%D0%B0:%D0%A1%D0%BF%D0%B8%D0%B4_%D0%B8%D0%B7_%D0%BA%D1%80%D0%BE%D1%82%D0%B0' }
+                        speedEntered () }
                     
                     if (e.keyCode == 27) {
                         $('.main-menu').toggleVisibility (true)
