@@ -59,8 +59,10 @@
                          -webkit-animation: appear 1s ease-in; animation: appear 1s ease-in;
                          -webkit-animation-direction: reverse; animation-direction: reverse; }
 
+            a { cursor: pointer; color: white; text-decoration: none; }
+
             .main-menu h1 { margin-top: -1em; font-size: 50px; letter-spacing: -2px; margin-bottom: 20px; }
-            .main-menu a { display: block; padding: 20px; transform: scale(1); cursor: pointer; color: white; text-decoration: none; }
+            .main-menu a { display: block; padding: 20px; transform: scale(1); }
 
             .main-menu a.play { opacity: 0.5; font-size: 40px; }
             .main-menu a.exit { opacity: 0.25; font-size: 30px; }
@@ -99,6 +101,15 @@
 			::-moz-placeholder { color: white; opacity: 0.25; }
 			:-ms-input-placeholder { color: white; opacity: 0.25; }
 			input:-moz-placeholder { color: white; opacity: 0.25; }
+
+			.enable-audio { position: absolute; opacity: 0.25; right: 80px; display: inline-block; padding: 10px; }
+
+			.enable-audio.active:before { content: 'disable chat audio'; }
+			.enable-audio:not(.active):before { content: 'enable chat audio'; }
+			.enable-audio.wait:before { content: 'wait...'; }
+
+			.btn.wait { pointer-events: none; }
+
         </style>
 
         <script>
@@ -166,6 +177,12 @@
 
 					$(document).ready (this.$ (function () {
 
+						$('.enable-audio').touchClick (this.$ (function (e) { var btn = $(e.delegateTarget)
+							btn.addClass ('wait')
+							var yes = !(btn.hasClass ('active') || false)
+							this.skylink.joinRoom ({ audio: yes, video: false }, function () {
+								$(e.delegateTarget).removeClass ('wait').toggleClass ('active', yes) }) }))
+
 						$('.chat input').keydown (this.$ (function (e) {
 							if (e.keyCode === 13) {
 								this.skylink.sendP2PMessage (e.delegateTarget.value)
@@ -180,7 +197,7 @@
 						this.skylink.on ('peerLeft', this.$ (function (peerId, peerInfo, isSelf) {
 							this.addMessage ('left', 'left the game', peerId, peerInfo, isSelf)
   							if (isSelf) {
-  								$('.chat').toggleVisibility (false) } }))
+  								/*$('.chat').toggleVisibility (false)*/ } }))
 
   						this.skylink.on ('incomingMessage', this.$ (function (message, peerId, peerInfo, isSelf) {
   							var sys = this.parseSystemMessage (message.content)
@@ -311,7 +328,7 @@
         <div class="chat" style="display:none;">
         	<div class="block messages"></div>
         	<div class="block input">
-        		<input type="text" placeholder="Team speak"></input>
+        		<input type="text" placeholder="Team speak"></input> <a href="javascript:{}" class="btn enable-audio"></a>
         	</div>
         </div>
     </body>
