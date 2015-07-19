@@ -8,6 +8,8 @@
         <link rel="shortcut icon" href="http://www.gameniacgames.com/uploads/2/7/2/1/2721050/mole.ico">
         <!--<link rel="stylesheet" href="node_modules/useless/client/UI.error.css" type="text/css">-->
 
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" type="text/css">
+
         <script src="jquery-2.0.3.min.js"></script>
         <script src="node_modules/underscore/underscore-min.js"></script>
         <script src="node_modules/useless/build/useless.micro.min.js"></script>
@@ -103,11 +105,12 @@
 			:-ms-input-placeholder { color: white; opacity: 0.25; }
 			input:-moz-placeholder { color: white; opacity: 0.25; }
 
-			.enable-audio { position: absolute; opacity: 0.25; right: 80px; display: inline-block; padding: 10px; }
+			.enable-audio { position: absolute; opacity: 0.4; right: 80px; display: inline-block; padding: 10px; }
+			.enable-audio i { position: relative; top: 2px; left: -2px; }
 
-			.enable-audio.active:before { content: 'disable chat audio'; }
-			.enable-audio:not(.active):before { content: 'enable chat audio'; }
-			.enable-audio.wait:before { content: 'wait...'; }
+			.enable-audio.active:after { content: ' disable mic'; }
+			.enable-audio:not(.active):after { content: ' enable mic'; }
+			.enable-audio.wait:after { content: ' wait...'; }
 
 			.btn.wait { pointer-events: none; }
 
@@ -336,7 +339,7 @@
         <div class="chat" style="display:none;">
         	<div class="block messages"></div>
         	<div class="block input">
-        		<input type="text" placeholder="Team speak"></input> <a href="javascript:{}" class="btn enable-audio"></a>
+        		<input type="text" placeholder="Team speak"></input> <a href="javascript:{}" class="btn enable-audio"><i class="fa fa-microphone"></i></a>
         	</div>
         </div>
     </body>
