@@ -123,6 +123,8 @@
 
             .btn.wait { pointer-events: none; }
 
+            .peers { position: absolute; top: 60px; right: 80px; opacity: 0.25; text-align: right; }
+            .peers .peer i { margin-right: 4px; position: relative; top: 1px; }
         </style>
 
         <script>
@@ -187,7 +189,7 @@
 
                     this.skylink = new Skylink ()
 
-                    this.skylink.init ({ apiKey: '04f62cde-2773-4d0e-b749-e7aaf81a74eb' }, this.$ (function () {
+                    this.skylink.init ({ apiKey: 'd9d1464c-c07a-427a-91a2-4ef5f75cf667' }, this.$ (function () {
                         this.skylink.setUserData ({ name: 'mole_' + Format.randomHexString (3) })
                         this.skylink.joinRoom ({ audio: false, video: false }) }))
 
@@ -213,14 +215,18 @@
                                 $('.chat').toggleVisibility (true)
                                 this.initialized = true }
                             else {
-                                this.addMessage ('join', 'joined the game', peerId, peerInfo, isSelf) } }))
+                                $('.peers').append ($('<div class="peer">')
+                                    .append ('<i class="fa fa-user-secret"></i>')
+                                    .addClass ('id' + peerId)
+                                    .append ($('<span class="name">').text ((peerInfo.userData && peerInfo.userData.name) || peerId))) } }))
 
                         this.skylink.on ('peerLeft', this.$ (function (peerId, peerInfo, isSelf) {
+
+                            $('.peer.id' + peerId).remove ()
 
                             if (isSelf) {
                                 /*$('.chat').toggleVisibility (false)*/ }
                             else {
-                                this.addMessage ('left', 'left the game', peerId, peerInfo, isSelf)
                                 $('#' + peerId).remove ()
                                 this.updateAudioUsersCount () } }))
 
@@ -265,7 +271,7 @@
                             .addClass (action)
                             .append ($('<span class="who">')
                                 .toggleClass ('self', isSelf || false)
-                                .text (isSelf ? 'You' : peerInfo.userData.name || peerId))
+                                .text (isSelf ? 'You' : ((peerInfo.userData && peerInfo.userData.name) || peerId)))
                             .append ($('<span class="what">')
                                 .text (what))) }
             })
@@ -370,6 +376,8 @@
             <div class="block input">
                 <input type="text" placeholder="Team speak"></input> <a href="javascript:{}" class="btn enable-audio"><i class="fa fa-microphone"></i><span class="text"></span><span class="users" style="display:none;"></span></a>
             </div>
+        </div>
+        <div class="peers">
         </div>
     </body>
 </html>
