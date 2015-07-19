@@ -124,9 +124,10 @@
             .btn.wait { pointer-events: none; }
 
             .peers { font-size: 20px; position: absolute; top: 60px; right: 80px; text-align: right; }
-            .peers .peer { opacity: 0.25; }
-            .peers .peer i { margin-right: 4px; position: relative; top: 1px; }
-            .peers:empty:before { opacity: 0.25; content: 'Nobody\'s here :('; }
+            .peers .peer .name { opacity: 0.25; }
+            .peers .peer i { opacity: 0.25; margin-right: 5px; position: relative; top: 1px; }
+            .peers .peer i.fa-microphone { opacity: 0.5; }
+            .peers:not(.wait):empty:before { opacity: 0.25; content: 'Nobody\'s here :('; }
         </style>
 
         <script>
@@ -199,8 +200,10 @@
 
                         $('.enable-audio').touchClick (this.$ (function (e) { var btn = $(e.delegateTarget)
                             btn.addClass ('wait')
+                            $('.peers').addClass ('wait')
                             var yes = !(btn.hasClass ('active') || false)
                             this.skylink.joinRoom ({ audio: yes, video: false }, function () {
+                                $('.peers').removeClass ('wait')
                                 $(e.delegateTarget).removeClass ('wait').toggleClass ('active', yes) }) }))
 
                         $('.chat input').keydown (this.$ (function (e) {
@@ -240,6 +243,8 @@
                                                 .appendTo (document.body)
 
                                 this.updateAudioUsersCount ()
+
+                                $('.peer.id' + peerId + ' i').attr ('class', 'fa fa-microphone')
 
                                 attachMediaStream (vid[0], stream) } }))
 
