@@ -196,8 +196,9 @@
 
 						$('.chat input').keydown (this.$ (function (e) {
 							if (e.keyCode === 13) {
-								this.skylink.sendP2PMessage (e.delegateTarget.value)
-								e.delegateTarget.value = '' } }))
+                                if ((e.delegateTarget.value || '').trimmed.length) {
+								    this.skylink.sendP2PMessage (e.delegateTarget.value)
+								    e.delegateTarget.value = '' } } }))
 
 						this.skylink.on ('peerJoined', this.$ (function (peerId, peerInfo, isSelf) {
 							this.addMessage ('join', 'joined the game', peerId, peerInfo, isSelf)
