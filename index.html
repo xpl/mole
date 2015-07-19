@@ -137,12 +137,13 @@
                             this.loadSample (i, 'ogg', function () {
                                 console.log ('Failed to decode sample', i) }) }) }, this) },
 
-                play: function (i) {
+                play: function (i, gain) {
                     if (this.samples[i]) {
                         var sourceNode = this.audioContext.createBufferSource ()
                         var gainNode = this.audioContext.createGain ()
 
                         gainNode.connect (this.audioContext.destination)
+                        gainNode.gain.value = (gain === undefined) ? 1 : gain
 
                         sourceNode.buffer = this.samples[i]
                         sourceNode.connect (gainNode)
@@ -152,6 +153,8 @@
             })
 
 			Chat = $singleton ({
+
+				initialized: false,
 
 				init: function () {
 
@@ -171,7 +174,8 @@
 						this.skylink.on ('peerJoined', this.$ (function (peerId, peerInfo, isSelf) {
 							this.addMessage ('join', 'joined the game', peerId, peerInfo, isSelf)
 							if (isSelf) {
-								$('.chat').toggleVisibility (true) } }))
+								$('.chat').toggleVisibility (true)
+								this.initialized = true } }))
 
 						this.skylink.on ('peerLeft', this.$ (function (peerId, peerInfo, isSelf) {
 							this.addMessage ('left', 'left the game', peerId, peerInfo, isSelf)
@@ -179,8 +183,24 @@
   								$('.chat').toggleVisibility (false) } }))
 
   						this.skylink.on ('incomingMessage', this.$ (function (message, peerId, peerInfo, isSelf) {
-							this.addMessage ('message', message.content, peerId, peerInfo, isSelf) })) }))
+  							var sys = this.parseSystemMessage (message.content)
+  							if (sys) {
+  								if (!isSelf) {
+	  								if (sys.noise) {
+	  									Sounds.play (sys.noise, 0.5) } } }
+	  						else {
+								this.addMessage ('message', message.content, peerId, peerInfo, isSelf) } })) }))
 				},
+
+				parseSystemMessage: function (text) {
+					var parsed = text.match (/^###(.+)/)
+					return parsed && _.json (parsed[1]) },
+
+				sendSystemMessage: function (obj) {
+					return this.skylink.sendP2PMessage ('###' + _.json (obj)) },
+
+				sendNoise: function (i) {
+					this.sendSystemMessage ({ noise: i }) },
 
 				addMessage: function (action, what, peerId, peerInfo, isSelf) {
 					$('.chat .messages')
@@ -225,7 +245,7 @@
                     $('.controls').toggleVisibility (true)
                     if (Sounds.audioContext) {
                         $('.sound-notice').notify () }
-                        
+
                     Chat.init () })
 
                 var keyDown = {}
@@ -250,7 +270,12 @@
 
                     else if (e.keyCode in wasd) {
                             $('.controls .' + wasd[e.keyCode]).addClass ('pressed')
-                            Sounds.play (keyToSound[wasd[e.keyCode]])
+
+                            var sound = keyToSound[wasd[e.keyCode]]
+
+                            Sounds.play (sound)
+                            Chat.sendNoise (sound)
+
                             return false } } }))
 
                 $(document).keyup (_.preventsDefault (function (e) { keyDown[e.keyCode] = false
