@@ -199,8 +199,10 @@
                 peers: {},
                 history: [],
 
+                currentProtocolVersion: $property (1337),
+
                 saveHistory: function () {
-                    window.localStorage.setItem ('history', _.json ({ messages: this.history })) },
+                    window.localStorage.setItem ('heestory', _.json ({ messages: this.history })) },
 
                 renderHistory: function () {
                     var el = $('.chat .messages').empty ()
@@ -213,15 +215,16 @@
 
                 init: function () {
 
-                    this.history = (_.json (window.localStorage.getItem ('history')) || {}).messages || []
+                    this.history = (_.json (window.localStorage.getItem ('heestory')) || {}).messages || []
 
-                    //this.renderHistory ()
+                    this.renderHistory ()
 
                     this.skylink = new Skylink ()
 
                     this.skylink.init ({ apiKey: 'd9d1464c-c07a-427a-91a2-4ef5f75cf667' }, this.$ (function () {
                     
                     this.skylink.setUserData ({
+                        protocolVersion: this.currentProtocolVersion,
                         history: this.history,
                         name: window.localStorage.getItem ('nick') || ('mole_' + Format.randomHexString (3)) })
 
@@ -258,18 +261,22 @@
                         else {
 
                             var name = this.peerName (peerId, peerInfo)
-                            var peerHistory = (peerInfo.userData && peerInfo.userData.history) || []
- 
-                            console.log (name, 'has', peerHistory.length, 'messages')
+                            var peerData = peerInfo.userData || {}
+                            var peerHistory = peerData.history || []
 
-                            /*var concatHistory = this.history.concat (peerHistory)
-                            var mergedHistory = _.uniq (_.sortBy (concatHistory, _.property ('when')), true, _.property ('when'))
+                            if (peerData.protocolVersion === this.currentProtocolVersion) {
+                                console.log (name, 'has', peerHistory.length, 'messages')
 
-                            if (mergedHistory.length > this.history.length) {
-                                console.log ('merged', mergedHistory.length - this.history.length, 'messages from', name)
-                                this.history = mergedHistory
-                                this.renderHistory ()
-                                this.saveHistory () }*/
+                                var concatHistory = this.history.concat (peerHistory)
+                                var mergedHistory = _.uniq (_.sortBy (concatHistory, _.property ('when')), true, _.property ('when'))
+
+                                if (mergedHistory.length > this.history.length) {
+                                    console.log ('merged', mergedHistory.length - this.history.length, 'messages from', name)
+                                    this.history = mergedHistory
+                                    this.renderHistory ()
+                                    this.saveHistory () } }
+                            else {
+                                console.log (name, 'has incompatible protocol version') }
 
                             $('<div class="peer">')
                                 .append ('<i class="fa fa-user-secret"></i>')
