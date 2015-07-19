@@ -352,7 +352,7 @@
                         if (cmd[1] === 'nick') { var nick = cmd[2].trimmed
                             if (nick.length > 0) {
                                 window.localStorage.setItem ('nick', nick)
-                                this.skylink.setUserData ({ name: nick }) } }
+                                this.skylink.setUserData (_.extend (this.userData, { name: nick })) } }
 
                         else if (cmd[1] === 'me') {
                             this.sendSystemMessage ({ me: cmd[2] }) } }
