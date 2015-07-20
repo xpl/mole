@@ -335,15 +335,16 @@
 
                     this.skylink.on ('peerUpdated', this.$ (function (peerId, peerInfo, isSelf) {
 
-                        var oldPeer = this.peers[peerId]
+                        var oldPeer = _.cloneDeep (this.peers[peerId])
+                        var newPeer = this.peers[peerId] = _.cloneDeep (peerInfo)
+
                         if (oldPeer) {
-                            var oldNick = this.peerName (peerId, this.peers[peerId])
-                            var newNick = this.peerName (peerId, peerInfo)
-                            if (oldNick !== newNick) {
-                                oldPeer.userData.name = newNick
+                            var oldName = this.peerName (peerId, oldPeer)
+                            var newName = this.peerName (peerId, newPeer)
+                            if (oldName !== newName) {
                                 if (isSelf) {
-                                    this.sendSystemMessage ({ newNick: newNick, oldNick: oldNick }) }
-                                $('.peer.id' + peerId + ' .name').text (newNick) } } }))
+                                    this.sendSystemMessage ({ newNick: newName, oldNick: oldName }) }
+                                $('.peer.id' + peerId + ' .name').text (newName) } } }))
 
                     this.skylink.on ('peerLeft', this.$ (function (peerId, peerInfo, isSelf) {
 
