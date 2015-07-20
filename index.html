@@ -208,7 +208,7 @@
                 saveHistory: function (opts) { opts = opts || {}
                     this.history = _.last (this.history, this.maxMessagesToSave)
                     window.localStorage.setItem ('heestory', _.json ({ messages: this.history }))
-                    if (false /*opts.publish !== false*/) {
+                    if (opts.publish !== false) {
                         this.skylink.setUserData (_.extend (this.userData, { history: this.history })) } },
 
                 renderHistory: function () {
