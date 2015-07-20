@@ -201,6 +201,9 @@
 
                 currentProtocolVersion: $property (1337),
 
+                constructor: function () {
+                    this.saveHistory = this.saveHistory.debounced (100) },
+
                 saveHistory: function () {
                     this.history = _.last (this.history, 50)
                     window.localStorage.setItem ('heestory', _.json ({ messages: this.history }))
@@ -289,15 +292,16 @@
 
                     this.skylink.on ('peerUpdated', this.$ (function (peerId, peerInfo, isSelf) {
 
-                        var oldPeer = this.peers[peerId]
-                        if (oldPeer) {
-                            var oldName = (oldPeer .userData && oldPeer .userData.name) || peerId
-                            var newName = (peerInfo.userData && peerInfo.userData.name) || peerId
-                            if (oldName !== newName) {
-                                this.addMessage ({ action: 'nick-change', what: 'changed nick to ' + newName, who: oldName })
-                                $('.peer.id' + peerId + ' .name').text (newName) } }
+                        var oldPeer = _.cloneDeep (this.peers[peerId])
+                        var newPeer = this.peers[peerId] = _.cloneDeep (peerInfo)
 
-                        this.peers[peerId] = _.cloneDeep (peerInfo) }))
+                        if (oldPeer) {
+                            var oldName = this.peerName (peerId, oldPeer)
+                            var newName = this.peerName (peerId, newPeer)
+                            if (oldName !== newName) {
+                                if (isSelf) {
+                                    this.sendSystemMessage ({ newNick: newName, oldNick: oldName }) }
+                                $('.peer.id' + peerId + ' .name').text (newName) } } }))
 
                     this.skylink.on ('peerLeft', this.$ (function (peerId, peerInfo, isSelf) {
 
@@ -333,6 +337,9 @@
 
                             else if (sys.me) {
                                 this.logMessage ({ when: sys.when, action: 'me', what: sys.me, who: name }) }
+
+                            else if (sys.newNick) {
+                                this.logMessage ({ when: sys.when, action: 'nick-change', what: 'changed nick to ' + sys.newNick, who: sys.oldNick }) }
 
                             else if (sys.text) {
                                 this.logMessage ({ when: sys.when, action: 'message', what: sys.text, who: name }) } }
