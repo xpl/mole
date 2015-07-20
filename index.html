@@ -315,9 +315,9 @@
                     this.skylink.on ('incomingStream', this.$ (function (peerId, stream, isSelf) {
                         if (!isSelf) {
 
-                            var vid = $('#' + peerId)
-                            if (!vid.length) {
-                                 vid = $('<video style="pointer-events:none; transform: rotateY(-180deg);" autoplay>')
+                            $('#' + peerId).remove () // remove prev video element if any
+                            
+                            var vid = $('<video style="pointer-events:none; transform: rotateY(-180deg);" autoplay>')
                                             .attr ('id', peerId)
                                             .appendTo (document.body) }
 
