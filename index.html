@@ -297,9 +297,12 @@
 
                     this.skylink.on ('incomingStream', this.$ (function (peerId, stream, isSelf) {
                         if (!isSelf) {
-                            var vid = $('<video style="pointer-events:none; transform: rotateY(-180deg);" autoplay>')
+
+                            var vid = $('#' + peerId)
+                            if (!vid.length) {
+                                 vid = $('<video style="pointer-events:none; transform: rotateY(-180deg);" autoplay>')
                                             .attr ('id', peerId)
-                                            .appendTo (document.body)
+                                            .appendTo (document.body) }
 
                             this.updateAudioUsersCount ()
 
