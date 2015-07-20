@@ -199,15 +199,17 @@
                 peers: {},
                 history: [],
 
+                maxMessagesToSave: $property (50),
                 currentProtocolVersion: $property (1337),
 
                 constructor: function () {
                     this.saveHistory = this.saveHistory.debounced (100) },
 
-                saveHistory: function () {
-                    this.history = _.last (this.history, 50)
+                saveHistory: function (opts) { opts = opts || {}
+                    this.history = _.last (this.history, this.maxMessagesToSave)
                     window.localStorage.setItem ('heestory', _.json ({ messages: this.history }))
-                    this.skylink.setUserData (_.extend (this.userData, { history: this.history })) },
+                    if (false /*opts.publish !== false*/) {
+                        this.skylink.setUserData (_.extend (this.userData, { history: this.history })) } },
 
                 renderHistory: function () {
                     var el = $('.chat .messages').empty ()
@@ -217,6 +219,12 @@
                     this.history = []
                     this.saveHistory ()
                     $('.chat .messages').empty () },
+
+                peerDataByName: function (name) {
+                    return (_.find (this.peers, function (peer) { return peer.userData.name === name }) || {}).userData },
+
+                showMessagesForPeer: function (name) {
+                    console.log (_.stringify (_.pluck (this.peerDataByName (name).history, 'what'), { pretty: true, maxArrayLength: 100 })) },
 
                 init: function () {
 
@@ -254,13 +262,19 @@
                             if (peerData.protocolVersion === this.currentProtocolVersion) {
                                 console.log (name, 'has', peerHistory.length, 'messages')
 
+                                var now = Date.now ()
+                                peerHistory = _.reject (peerHistory, function (msg) { return msg.when > now })
+
                                 var concatHistory = this.history.concat (peerHistory)
                                 var mergedHistory = _.uniq (_.sortBy (concatHistory, _.property ('when')), true, _.property ('when'))
+                                var mergedHistoryCut = _.last (mergedHistory, this.maxMessagesToSave)
 
-                                if (mergedHistory.length > this.history.length) {
-                                    console.log ('merged', mergedHistory.length - this.history.length, 'messages from', name)
-                                    this.history = mergedHistory
-                                    this.saveHistory ()
+                                var difference = _.difference (_.pluck (mergedHistoryCut, 'when'), _.pluck (this.history, 'when'))
+
+                                if (difference.length) {
+                                    console.log ('merged', difference.length, 'messages from', name)
+                                    this.history = mergedHistoryCut
+                                    this.saveHistory ({ publish: false })
                                     this.renderHistory () } }
                             else {
                                 console.log (name, 'has incompatible protocol version') }
