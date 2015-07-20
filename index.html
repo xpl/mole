@@ -200,7 +200,7 @@
                 history: [],
 
                 maxMessagesToSave: $property (50),
-                currentProtocolVersion: $property (1337),
+                currentProtocolVersion: $property (1337 + 1),
 
                 constructor: function () {
                     this.saveHistory = this.saveHistory.debounced (100) },
@@ -263,18 +263,21 @@
                                 console.log (name, 'has', peerHistory.length, 'messages')
 
                                 var now = Date.now ()
-                                peerHistory = _.reject (peerHistory, function (msg) { return msg.when > now })
+                                var validPeerHistory = _.reject (peerHistory, function (msg) { return !msg.tag || (msg.when > now) })
 
-                                var concatHistory = this.history.concat (peerHistory)
-                                var mergedHistory = _.uniq (_.sortBy (concatHistory, _.property ('when')), true, _.property ('when'))
+                                if (validPeerHistory.length < peerHistory.length) {
+                                    console.log ('rejected', peerHistory.length - validPeerHistory.length, 'messages from', name) }
+
+                                var concatHistory = this.history.concat (validPeerHistory)
+                                var mergedHistory = _.uniq (_.sortBy (concatHistory, _.property ('when')), true, _.property ('tag'))
                                 var mergedHistoryCut = _.last (mergedHistory, this.maxMessagesToSave)
 
-                                var difference = _.difference (_.pluck (mergedHistoryCut, 'when'), _.pluck (this.history, 'when'))
+                                var difference = _.difference (_.pluck (mergedHistoryCut, 'tag'), _.pluck (this.history, 'tag'))
 
                                 if (difference.length) {
                                     console.log ('merged', difference.length, 'messages from', name)
                                     this.history = mergedHistoryCut
-                                    this.saveHistory ({ publish: false })
+                                    this.saveHistory ()
                                     this.renderHistory () } }
                             else {
                                 console.log (name, 'has incompatible protocol version') }
@@ -335,13 +338,13 @@
                                     Sounds.play (sys.noise, 0.5) } }
 
                             else if (sys.me) {
-                                this.logMessage ({ when: sys.when, action: 'me', what: sys.me, who: name }) }
+                                this.logMessage ({ tag: sys.tag, when: sys.when, action: 'me', what: sys.me, who: name }) }
 
                             else if (sys.newNick) {
-                                this.logMessage ({ when: sys.when, action: 'nick-change', what: 'changed nick to ' + sys.newNick, who: sys.oldNick }) }
+                                this.logMessage ({ tag: sys.tag, when: sys.when, action: 'nick-change', what: 'changed nick to ' + sys.newNick, who: sys.oldNick }) }
 
                             else if (sys.text) {
-                                this.logMessage ({ when: sys.when, action: 'message', what: sys.text, who: name }) } }
+                                this.logMessage ({ tag: sys.tag, when: sys.when, action: 'message', what: sys.text, who: name }) } }
 
                         else {
                             this.addMessage ({ action: 'message', what: message.content, who: name }) } }))
@@ -390,7 +393,8 @@
                     var parsed = text.match (/^###(.+)/)
                     return parsed && _.json (parsed[1]) },
 
-                sendSystemMessage: function (obj, peerId) { var str = '###' + _.json (_.extend ({ when: Date.now () }, obj))
+                sendSystemMessage: function (obj, peerId) {
+                    var str = '###' + _.json (_.extend ({ tag: Format.randomHexString (6), when: Date.now () }, obj))
                     return peerId ?
                         this.skylink.sendP2PMessage (str, peerId) :
                         this.skylink.sendP2PMessage (str) },
