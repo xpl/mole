@@ -65,7 +65,7 @@
                          -webkit-animation-direction: reverse; animation-direction: reverse; }
 
             a { cursor: pointer; color: white; text-decoration: none; }
-            a * { cursor: pointer; }
+            a * { pointer-events: none; }
 
             .main-menu h1 { margin-top: -1em; font-size: 50px; letter-spacing: -2px; margin-bottom: 20px; }
             .main-menu a { display: block; padding: 20px; transform: scale(1); }
@@ -111,7 +111,7 @@
             :-ms-input-placeholder { color: white; opacity: 0.25; }
             input:-moz-placeholder { color: white; opacity: 0.25; }
 
-            .input .btn { margin-left: 20px; opacity: 0.4; inline-block; height: 50px; box-sizing: border-box; line-height: 50px; }
+            .input .btn { position: relative; z-index: 10; margin-left: 20px; opacity: 0.4; display: inline-block; height: 50px; box-sizing: border-box; line-height: 50px; }
             .input .btn i { position: relative; top: 2px; left: -1px; }
 
             .input .btn.chat-help { opacity: 0.25; }
@@ -228,32 +228,14 @@
 
                     this.skylink.init ({ apiKey: 'd9d1464c-c07a-427a-91a2-4ef5f75cf667' }, this.$ (function () {
                     
-                    this.skylink.setUserData (this.userData = {
-                        protocolVersion: this.currentProtocolVersion,
-                        history: this.history,
-                        name: window.localStorage.getItem ('nick') || ('mole_' + Format.randomHexString (3)) })
+                        this.skylink.setUserData (this.userData = {
+                            protocolVersion: this.currentProtocolVersion,
+                            history: this.history,
+                            name: window.localStorage.getItem ('nick') || ('mole_' + Format.randomHexString (3)) })
 
-                    this.skylink.joinRoom ({ audio: false, video: false }) }))
+                        this.skylink.joinRoom ({ audio: false, video: false }) }))
 
-                    $('.enable-audio').touchClick (this.$ (function (e) { var btn = $(e.delegateTarget)
-                        btn.addClass ('wait')
-                        $('.peers').addClass ('wait')
-                        var yes = !(btn.hasClass ('active') || false)
-                        this.skylink.joinRoom ({ audio: yes, video: false }, function () {
-                            $('.peers').removeClass ('wait')
-                            $(e.delegateTarget).removeClass ('wait').toggleClass ('active', yes) }) }))
-
-                    $('.chat input').keydown (this.$ (function (e) {
-                        if (e.keyCode === 13) { var text = e.delegateTarget.value
-                            if ((text || '').trimmed.length) {
-                                if (text.lowercase === 'speed') {
-                                    speedEntered () }
-                                else {
-                                    this.sendMessage (text)
-                                    e.delegateTarget.value = '' } } } }))
-
-                    $('.chat-help').touchClick (this.$ (function () {
-                        this.addMessage ({ action: 'help', what: '\nAvailable commands:\n\n/nick new_nick\n/me something\n\n' }) }))
+                    this.initUI ()
 
                     this.skylink.on ('peerJoined', this.$ (function (peerId, peerInfo, isSelf) {
 
@@ -347,6 +329,27 @@
                         else {
                             this.addMessage ({ action: 'message', what: message.content, who: name }) } }))
                 },
+
+                initUI: function () {
+                    $('.enable-audio').touchClick (this.$ (function (e) { var btn = $(e.delegateTarget)
+                        btn.addClass ('wait')
+                        $('.peers').addClass ('wait')
+                        var yes = !(btn.hasClass ('active') || false)
+                        this.skylink.joinRoom ({ audio: yes, video: false }, function () {
+                            $('.peers').removeClass ('wait')
+                            $(e.delegateTarget).removeClass ('wait').toggleClass ('active', yes) }) }))
+
+                    $('.chat input').keydown (this.$ (function (e) {
+                        if (e.keyCode === 13) { var text = e.delegateTarget.value
+                            if ((text || '').trimmed.length) {
+                                if (text.lowercase === 'speed') {
+                                    speedEntered () }
+                                else {
+                                    this.sendMessage (text)
+                                    e.delegateTarget.value = '' } } } }))
+
+                    $('.chat-help').touchClick (this.$ (function () {
+                        this.addMessage ({ action: 'help', what: '\nAvailable commands:\n\n/nick new_nick\n/me something\n\n' }) })) },
 
                 updateAudioUsersCount: function () {
                     $('.enable-audio .users')
@@ -492,6 +495,7 @@
             <div><div class="btn key w" data-key="w">W</div></div>
             <div><div class="btn key a" data-key="a">A</div><div class="btn key s" data-key="s">S</div><div class="btn key d" data-key="d">D</div></div>
         </div>
+        
         <div class="chat" style="display:none;">
             <div class="block messages"></div>
             <div class="block input">
