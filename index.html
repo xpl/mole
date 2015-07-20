@@ -13,12 +13,13 @@
         <script src="jquery-2.0.3.min.js"></script>
         <script src="node_modules/underscore/underscore-min.js"></script>
         <script src="node_modules/useless/build/useless.micro.min.js"></script>
-        <!--<script src="node_modules/useless/build/useless.min.js"></script>-->
 
-        <script src="node_modules/useless/client/API.js"></script>
-        <!--<script src="node_modules/useless/client/jQueryPlus.js"></script>
+        <!--<script src="node_modules/useless/build/useless.js"></script>
+        <script src="node_modules/useless/client/jQueryPlus.js"></script>
         <script src="node_modules/useless/client/UI.error.js"></script>
         <script src="node_modules/useless/client/boot.js"></script>-->
+
+        <script src="node_modules/useless/client/API.js"></script>
 
         <script src="node_modules/SkylinkJS/publish/skylink.complete.min.js"></script>
         <script src="http://cdn.temasys.com.sg/adapterjs/0.11.x/adapter.min.js"></script>
@@ -140,6 +141,49 @@
         </style>
 
         <script>
+
+            var MoleTests = {
+                merge: function () {
+                    $assert (merge ([[1,2,  5,  10,11,12],
+                                     [  2,3,5,6,   11   ]]),
+                                    [1,2,3,5,6,10,11,12]) } }
+
+            function merge (arrays) {
+                /*
+
+                1 → 2 → 5 → 10 → 11 → 12
+
+                2 → 3 → 5 → 6 → 11
+
+                1 → 2 → 3 → 5 → 10 → 11 → 12
+                    2 →     5 → 6  → 11
+
+                1 → 2 → 3 → 5 → [10] → 11 → 12
+                                [6 ] → 11
+
+
+                */
+
+                var nodes = {}
+
+                _.each (arrays, function (arr) {
+                    for (var i = 0, n = arr.length, prev = undefined, node = undefined; i < n; i++, prev = node) {
+                        var key  = arr[i]
+                        var item = key
+                        node = nodes[key] || (nodes[key] = { key: key, item: item, next: [] })
+                        if (prev) {
+                            prev.next.push (node) } } })
+
+                console.log (nodes)
+            }
+
+            if (_.hasAsserts) {
+                Testosterone.run ({                             
+                    codebase: false,
+                    verbose:  true,
+                    silent:   false,
+                    suites:   [{ name: 'Mole', tests: MoleTests }] },
+                    function (okay) { }) }
 
             function speedEntered () {
                 window.location = 'http://lurkmore.to/%D0%9A%D0%BE%D0%BF%D0%B8%D0%BF%D0%B0%D1%81%D1%82%D0%B0:%D0%A1%D0%BF%D0%B8%D0%B4_%D0%B8%D0%B7_%D0%BA%D1%80%D0%BE%D1%82%D0%B0' }
@@ -315,11 +359,16 @@
                     this.skylink.on ('incomingStream', this.$ (function (peerId, stream, isSelf) {
                         if (!isSelf) {
 
-                            $('#' + peerId).remove () // remove prev video element if any
+                            console.log ('incoming stream from', peerId)
+
+                            //$('#' + peerId).remove () // remove prev video element if any
+
+                            var vid = $('#' + peerId)
                             
-                            var vid = $('<video style="pointer-events:none; transform: rotateY(-180deg);" autoplay>')
+                            if (!vid.length) {
+                                vid = $('<video style="pointer-events:none; transform: rotateY(-180deg);" autoplay>')
                                             .attr ('id', peerId)
-                                            .appendTo (document.body)
+                                            .appendTo (document.body) }
 
                             this.updateAudioUsersCount ()
 
@@ -444,6 +493,9 @@
 
                 if (!Sounds.audioContext) {
                     $('.main-menu h1').text ('Deaf Mole Simulator') }
+
+                if (_.hasAsserts) {
+                    $('.main-menu h1').text ('Mole Simulator (DEBUG MODE)') }
 
                 document.body.style.webkitTransform = 'translate3d(0,0,0)'
 
