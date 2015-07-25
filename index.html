@@ -6,21 +6,28 @@
         <title>Mole Simulator</title>
 
         <link rel="shortcut icon" href="http://www.gameniacgames.com/uploads/2/7/2/1/2721050/mole.ico">
-        <!--<link rel="stylesheet" href="node_modules/useless/client/UI.error.css" type="text/css">-->
 
+        <!-- FontAwesome (vector icons) -->
         <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" type="text/css">
 
+        <!-- JQuery / underscore -->
         <script src="jquery-2.0.3.min.js"></script>
         <script src="node_modules/underscore/underscore-min.js"></script>
+
+        <!-- Useless.js release build (no asserts / error reporting) -->
         <script src="node_modules/useless/build/useless.micro.min.js"></script>
 
+        <!-- Useless.js debug build -->
         <!--<script src="node_modules/useless/build/useless.js"></script>
         <script src="node_modules/useless/client/jQueryPlus.js"></script>
         <script src="node_modules/useless/client/UI.error.js"></script>
-        <script src="node_modules/useless/client/boot.js"></script>-->
+        <script src="node_modules/useless/client/boot.js"></script>
+        <link rel="stylesheet" href="node_modules/useless/client/UI.error.css" type="text/css">-->
 
+        <!-- For Http.loadFile -->
         <script src="node_modules/useless/client/API.js"></script>
 
+        <!-- WebRTC API shim -->
         <script src="node_modules/SkylinkJS/publish/skylink.complete.min.js"></script>
         <script src="http://cdn.temasys.com.sg/adapterjs/0.11.x/adapter.min.js"></script>
 
@@ -58,10 +65,10 @@
                       -ms-flex-pack: center; -ms-align-content: center; -moz-align-content: center; -webkit-align-content: center; align-content: center;
                       -ms-justify-content: center; -moz-justify-content: center; -webkit-justify-content: center; justify-content: center; }
 
-            .appear { pointer-events: none;
+            .appear { /*pointer-events: none;*/
                       -webkit-animation: appear 1s ease-out; animation: appear 1s ease-out;  }
 
-            .disappear { pointer-events: none;
+            .disappear { /*pointer-events: none;*/
                          -webkit-animation: appear 1s ease-in; animation: appear 1s ease-in;
                          -webkit-animation-direction: reverse; animation-direction: reverse; }
 
@@ -144,37 +151,47 @@
 
             var MoleTests = {
                 merge: function () {
-                    $assert (merge ([[1,2,  5,  10,11,12],
-                                     [  2,3,5,6,   11   ]]),
-                                    [1,2,3,5,6,10,11,12]) } }
+                  $assert (merge ([['all','your',                'to','us'],
+                                   [      'your',       'belong',     'us'],
+                                   [             'base','belong','to'     ],
+                                   [      'your','base'                   ]]),
+                                   ['all','your','base','belong','to','us']) } }
 
-            function merge (arrays) {
-                /*
+            function merge (arrays, cfg) { cfg = cfg || { key: _.identity }
 
-                1 → 2 → 5 → 10 → 11 → 12
-
-                2 → 3 → 5 → 6 → 11
-
-                1 → 2 → 3 → 5 → 10 → 11 → 12
-                    2 →     5 → 6  → 11
-
-                1 → 2 → 3 → 5 → [10] → 11 → 12
-                                [6 ] → 11
-
-
-                */
-
+                var head = { key: null, next: {} }
                 var nodes = {}
 
                 _.each (arrays, function (arr) {
-                    for (var i = 0, n = arr.length, prev = undefined, node = undefined; i < n; i++, prev = node) {
-                        var key  = arr[i]
-                        var item = key
-                        node = nodes[key] || (nodes[key] = { key: key, item: item, next: [] })
+                    for (var i = 0, n = arr.length, prev = head, node = undefined; i < n; i++, prev = node) {
+                        var item = arr[i]
+                        var key  = cfg.key (item)
+                        node = nodes[key] || (nodes[key] = { key: key, item: item, next: {} })
                         if (prev) {
-                            prev.next.push (node) } } })
+                            prev.next[key] = node } } })
 
-                console.log (nodes)
+                var decyclize = function (visited, node) { visited[node.key] = true
+
+                    node.next = _.chain (_.values (node.next))
+                                    .filter (function (node) { return !(node.key in visited) })
+                                    .map (decyclize.partial (visited)).value ()
+                    
+                    delete visited[node.key]; return node }
+
+                var ordered = function (a, b) {
+                    return (a === b) || _.some (a.next, function (aa) { return ordered (aa, b) }) }
+
+                var flatten = function (node) { if (!node) return []
+
+                    var next = cfg.sort ? _.sortBy (node.next || [], cfg.sort) : (node.next || [])
+
+                    return [node].concat (flatten (_.reduce (next, function (a, b) {
+
+                        if (a === b)             { return a }
+                        else if (ordered (b, a)) { b.next.push (a); return b }
+                        else                     { a.next.push (b); return a } }))) }
+
+                return _.rest (_.pluck (flatten (decyclize ({}, head)), 'item'))
             }
 
             if (_.hasAsserts) {
@@ -240,11 +257,13 @@
             Chat = $singleton ({
 
                 initialized: false,
+                connected: false,
                 peers: {},
+                peerNames: {},
                 history: [],
 
                 maxMessagesToSave: $property (50),
-                currentProtocolVersion: $property (1337 + 1),
+                currentProtocolVersion: $property (1337 + 2),
 
                 constructor: function () {
                     this.saveHistory = this.saveHistory.debounced (100) },
@@ -253,23 +272,42 @@
                     this.history = _.last (this.history, this.maxMessagesToSave)
                     window.localStorage.setItem ('heestory', _.json ({ messages: this.history }))
                     if (opts.publish !== false) {
-                        this.skylink.setUserData (_.extend (this.userData, { history: this.history })) } },
+                        this.updateUserData ({ history: this.history }) } },
 
                 renderHistory: function () {
-                    var el = $('.chat .messages').empty ()
-                    el.append (_.map (this.history, this.$ (this.renderMessage))) },
+                    try {
+                        var el = $('.chat .messages').empty ()
+                        el.append (_.map (this.history, this.$ (this.renderMessage))) }
+                    catch (e) {
+                        console.log ('Error while rendering history (resetting):', e)
+                        Chat.clearHistory () } }, // try reset (probly a bug in sync protocol)
 
                 clearHistory: function () {
                     this.history = []
                     this.saveHistory ()
                     $('.chat .messages').empty () },
 
-                peerDataByName: function (name) {
+                /*peerDataByName: function (name) {
                     return (_.find (this.peers, function (peer) { return peer.userData.name === name }) || {}).userData },
 
                 showMessagesForPeer: function (name) {
-                    console.log (_.stringify (_.pluck (this.peerDataByName (name).history, 'what'), { pretty: true, maxArrayLength: 100 })) },
+                    console.log (_.stringify (_.pluck (this.peerDataByName (name).history, 'what'), { pretty: true, maxArrayLength: 100 })) },*/
 
+                mergePeerHistories: function () {
+
+                    var peers = _.nonempty (_.pluck (this.peers, 'userData'))
+                    var peerHistories = _.nonempty (_.map (_.sortBy (peers, 'uptime'), function (peerData) {
+                        return ((peerData.protocolVersion === this.currentProtocolVersion) && peerData.history) || undefined }, this))
+
+                    this.history = merge (peerHistories, { key: _.property ('tag') })
+                    this.saveHistory ()
+                    this.renderHistory () },
+
+                initUptimeUpdating: function (interval) {
+                    window.setInterval (this.$ (function () {
+                        if (this.connected) {
+                            this.updateUserData ({ uptime: this.userData.uptime + interval }) } }), interval * 1000) },
+                    
                 init: function () {
 
                     this.history = (_.json (window.localStorage.getItem ('heestory')) || {}).messages || []
@@ -278,53 +316,35 @@
 
                     this.skylink = new Skylink ()
 
-                    this.skylink.init ({ apiKey: '8168befd-e553-461e-a073-03e44d9a6b29' }, this.$ (function () {
+                    this.skylink.init ({ apiKey: _.hasAsserts ?
+                            '5508b369-a58a-4e6c-ba16-af433f66b77d' :
+                            '8168befd-e553-461e-a073-03e44d9a6b29' }, this.$ (function () {
                     
                         this.skylink.setUserData (this.userData = {
+                            uptime: 0,
                             protocolVersion: this.currentProtocolVersion,
                             history: this.history,
                             name: window.localStorage.getItem ('nick') || ('mole_' + Format.randomHexString (3)) })
 
-                        this.skylink.joinRoom ({ audio: false, video: false }) }))
+                        this.skylink.joinRoom ({ audio: false, video: false })
+
+                        this.initUptimeUpdating (5) }))
 
                     this.initUI ()
 
                     this.skylink.on ('peerJoined', this.$ (function (peerId, peerInfo, isSelf) {
 
-                        this.peers[peerId] = _.cloneDeep (peerInfo)
+                                   this.peers[peerId] = peerInfo
+                        var name = this.peerNames[peerId] = this.peerName (peerId, peerInfo)
 
                         if (isSelf) {
                             $('.chat').toggleVisibility (true)
                             $('.peers').toggleVisibility (true)
-                            this.initialized = true }
+                            this.initialized = true
+                            this.connected = true }
+
                         else {
-
-                            var name = this.peerName (peerId, peerInfo)
-                            var peerData = peerInfo.userData || {}
-                            var peerHistory = peerData.history || []
-
-                            if (peerData.protocolVersion === this.currentProtocolVersion) {
-                                console.log (name, 'has', peerHistory.length, 'messages')
-
-                                var now = Date.now ()
-                                var validPeerHistory = _.reject (peerHistory, function (msg) { return !msg.tag || (msg.when > now) })
-
-                                if (validPeerHistory.length < peerHistory.length) {
-                                    console.log ('rejected', peerHistory.length - validPeerHistory.length, 'messages from', name) }
-
-                                var concatHistory = this.history.concat (validPeerHistory)
-                                var mergedHistory = _.uniq (_.sortBy (concatHistory, _.property ('when')), true, _.property ('tag'))
-                                var mergedHistoryCut = _.last (mergedHistory, this.maxMessagesToSave)
-
-                                var difference = _.difference (_.pluck (mergedHistoryCut, 'tag'), _.pluck (this.history, 'tag'))
-
-                                if (difference.length) {
-                                    console.log ('merged', difference.length, 'messages from', name)
-                                    this.history = mergedHistoryCut
-                                    this.saveHistory ()
-                                    this.renderHistory () } }
-                            else {
-                                console.log (name, 'has incompatible protocol version') }
+                            this.mergePeerHistories ()
 
                             $('<div class="peer">')
                                 .append ('<i class="fa fa-user-secret"></i>')
@@ -335,12 +355,12 @@
 
                     this.skylink.on ('peerUpdated', this.$ (function (peerId, peerInfo, isSelf) {
 
-                        var oldPeer = _.cloneDeep (this.peers[peerId])
-                        var newPeer = this.peers[peerId] = _.cloneDeep (peerInfo)
+                        this.peers[peerId] = peerInfo
 
-                        if (oldPeer) {
-                            var oldName = this.peerName (peerId, oldPeer)
-                            var newName = this.peerName (peerId, newPeer)
+                        var oldName = this.peerNames[peerId]
+                        var newName = this.peerNames[peerId] = this.peerName (peerId, peerInfo)
+
+                        if (oldName) {
                             if (oldName !== newName) {
                                 if (isSelf) {
                                     this.sendSystemMessage ({ newNick: newName, oldNick: oldName }) }
@@ -349,12 +369,16 @@
                     this.skylink.on ('peerLeft', this.$ (function (peerId, peerInfo, isSelf) {
 
                         delete this.peers[peerId]
+                        delete this.peerNames[peerId]
 
                         $('.peer.id' + peerId).animateWith ('disappear', function () { $(this).remove () })
 
                         if (!isSelf) {
                             $('#' + peerId).remove ()
-                            this.updateAudioUsersCount () } }))
+                            this.updateAudioUsersCount () }
+                        else {
+                            this.connected = false
+                            this.updateUserData ({ uptime: 0 }) } }))
 
                     this.skylink.on ('incomingStream', this.$ (function (peerId, stream, isSelf) {
                         if (!isSelf) {
@@ -404,6 +428,7 @@
                         btn.addClass ('wait')
                         $('.peers').addClass ('wait')
                         var yes = !(btn.hasClass ('active') || false)
+                        this.skylink.updateUserData ({ uptime: 0 })
                         this.skylink.joinRoom ({ audio: yes, video: false }, function () {
                             $('.peers').removeClass ('wait')
                             $(e.delegateTarget).removeClass ('wait').toggleClass ('active', yes) }) }))
@@ -431,12 +456,15 @@
                         if (cmd[1] === 'nick') { var nick = cmd[2].trimmed
                             if (nick.length > 0) {
                                 window.localStorage.setItem ('nick', nick)
-                                this.skylink.setUserData (_.extend (this.userData, { name: nick })) } }
+                                this.updateUserData ({ name: nick }) } }
 
                         else if (cmd[1] === 'me') {
                             this.sendSystemMessage ({ me: cmd[2] }) } }
                     else {
                         this.sendSystemMessage ({ text: text }) } },
+
+                updateUserData: function (what) {
+                    this.skylink.setUserData (_.extend (this.userData, what)) },
 
                 parseSystemMessage: function (text) {
                     var parsed = text.match (/^###(.+)/)

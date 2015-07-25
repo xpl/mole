@@ -17,4 +17,6 @@ App = $singleton (Component, {
 		require ('useless/server/io'),
 		require ('useless/server/http') ],
 
-	init: function (then) { then () } })
+	init: function (then) {
+
+		then () } })
