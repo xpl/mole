@@ -428,7 +428,7 @@
                         btn.addClass ('wait')
                         $('.peers').addClass ('wait')
                         var yes = !(btn.hasClass ('active') || false)
-                        this.skylink.updateUserData ({ uptime: 0 })
+                        this.updateUserData ({ uptime: 0 })
                         this.skylink.joinRoom ({ audio: yes, video: false }, function () {
                             $('.peers').removeClass ('wait')
                             $(e.delegateTarget).removeClass ('wait').toggleClass ('active', yes) }) }))
