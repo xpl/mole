@@ -8,14 +8,14 @@ App = $singleton (Component, {
 		'/':     this.file ('./index.html'),
 		':file': this.file ('./') } },
 
-	$traits: [
-		
-		require ('useless/server/exceptions'),
-		require ('useless/server/tests'),
-		require ('useless/server/deploy'),
-		require ('useless/server/api'),
-		require ('useless/server/io'),
-		require ('useless/server/http') ],
+    $depends: [
+        require ('useless/server/args'),
+        require ('useless/server/tests'),
+        require ('useless/server/supervisor'),
+        require ('useless/server/http'),
+        require ('useless/server/deploy'),
+        require ('useless/server/websocket'),
+        require ('useless/server/devtools')],
 
 	init: function (then) {
 

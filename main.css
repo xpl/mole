@@ -1,0 +1,113 @@
+
+@keyframes appear {
+    0%    { transform: scale(0.9); opacity: 0; }
+    100%  { transform: scale(1); opacity: 1; } }
+
+@-webkit-keyframes appear {
+    0%    { -webkit-transform: scale(0.9); opacity: 0; }
+    100%  { -webkit-transform: scale(1); opacity: 1; } }
+
+@keyframes notice {
+    0%    { transform: scale(0.9); opacity: 0; }
+    50%   { transform: scale(1);   opacity: 1; }
+    100%  { transform: scale(1.1); opacity: 0; } }
+
+@-webkit-keyframes notice {
+    0%    { -webkit-transform: scale(0.9); opacity: 0; }
+    50%   { -webkit-transform: scale(1);   opacity: 1; }
+    100%  { -webkit-transform: scale(1.1); opacity: 0; } }
+
+*:not(input) { -webkit-animation-fill-mode: forwards; animation-fill-mode: forwards;
+    cursor: default; -webkit-user-select: none; -moz-user-select: none; user-select: none; }
+
+input { outline: none; }
+
+body { width: 100%; height: 100%; box-sizing: border-box; overflow: hidden; background: black; color: white; font-family: Helvetica, sans-serif; position: relative; padding: 0; margin: 0; }
+
+.center { position: absolute; left: 0; top: 0; right: 0; bottom: 0; text-align: center; }
+.center { display: -ms-flexbox; display: -moz-flex; display: -webkit-flex; display: flex;
+          -ms-flex-direction: column; -moz-flex-direction: column; -webkit-flex-direction: column; flex-direction: column;
+          -ms-align-items: center; -moz-align-items: center; -webkit-align-items: center; align-items: center;
+          -ms-flex-pack: center; -ms-align-content: center; -moz-align-content: center; -webkit-align-content: center; align-content: center;
+          -ms-justify-content: center; -moz-justify-content: center; -webkit-justify-content: center; justify-content: center; }
+
+.appear { /*pointer-events: none;*/
+          -webkit-animation: appear 1s ease-out; animation: appear 1s ease-out;  }
+
+.disappear { /*pointer-events: none;*/
+             -webkit-animation: appear 1s ease-in; animation: appear 1s ease-in;
+             -webkit-animation-direction: reverse; animation-direction: reverse; }
+
+a { cursor: pointer; color: white; text-decoration: none; }
+a * { pointer-events: none; }
+
+.main-menu h1 { margin-top: -1em; font-size: 50px; letter-spacing: -2px; margin-bottom: 20px; }
+.main-menu a { display: block; padding: 20px; transform: scale(1); }
+
+.main-menu a.play { opacity: 0.5; font-size: 40px; }
+.main-menu a.exit { opacity: 0.25; font-size: 30px; }
+
+.controls { text-align: center; position: absolute; left: 0; bottom: 0; padding: 50px; }
+
+.controls .key {    cursor: pointer; display: inline-block; width: 50px; height: 50px; margin: 5px;
+                    box-sizing: border-box; border: 1px solid white; border-radius: 5px;
+                    text-align: center; line-height: 50px; opacity: 0.5; color: white; text-decoration: none; }
+
+.btn { transition: all 0.1s ease-in-out; -webkit-transform: scale(1); transform: scale(1); }
+.btn.pressed,
+html:not(.touch) .btn:hover { opacity: 1 !important; -webkit-transform: scale(1.1); transform: scale(1.1); }
+
+.notice { font-size: 60px; color: rgba(255,255,255,0.5); }
+
+.notice.active { -webkit-animation: notice 5s linear; animation: notice 5s linear; }
+
+.chat { position: absolute; left: 300px; right: 0; bottom: 55px; height: 200px; font-size: 20px; }
+.chat input { background: none; border: none; color: white; cursor: text; padding: 10px 0; font-size: 20px; }
+.chat .input:before { content: '>'; position: absolute; line-height: 50px; top: 0; bottom: 0; right: 100%; opacity: 0.4; margin-right: 10px; }
+
+.chat .messages { width: 100%; position: absolute; bottom: 100px; }
+.chat .input { width: 100%; position: absolute; bottom: 0; }
+.chat input { width: 400px; max-width: 100%; height: 50px; box-sizing: border-box; }
+
+.chat .entry { opacity: 0.25; }
+.chat .entry.message { opacity: 0.5; }
+
+.chat .entry         .who { white-space: nowrap; }
+.chat .entry.message .who { opacity: 0.5; position: absolute; right: 100%; margin-right: 5px;}
+
+.chat .entry         .who:after { content: ' ' ; }
+.chat .entry.message .who:after { content: ': '; }
+
+.chat .entry { min-height: 1em; }
+
+::-webkit-input-placeholder { color: white; opacity: 0.25; }
+::-moz-placeholder { color: white; opacity: 0.25; }
+:-ms-input-placeholder { color: white; opacity: 0.25; }
+input:-moz-placeholder { color: white; opacity: 0.25; }
+
+.input .btn { position: relative; z-index: 10; margin-left: 20px; opacity: 0.4; display: inline-block; height: 50px; box-sizing: border-box; line-height: 50px; }
+.input .btn i { position: relative; top: 2px; left: -1px; }
+
+.input .btn.chat-help { opacity: 0.25; }
+.input .btn.chat-help i { top: 1px; }
+
+.input .buttons { position: absolute; display: inline-block; right: 80px; }
+
+.enable-audio.active .text:before { content: ' disable mic'; }
+.enable-audio:not(.active) .text:before { content: ' enable mic'; }
+.enable-audio.wait .text:before { content: ' wait...'; }
+
+.enable-audio .users { opacity: 0.5; }
+.enable-audio .users:before { content: ' ('; }
+.enable-audio .users:after { content: ' users)'; }
+
+.btn.wait { pointer-events: none; }
+
+.peers { font-size: 20px; position: absolute; top: 60px; right: 80px; text-align: right; }
+.peers .peer .name { opacity: 0.25; }
+.peers .peer i { display: inline-block; width: 25px; text-align: center; opacity: 0.25; position: relative; top: 1px; }
+.peers .peer i.fa-microphone { opacity: 0.5; }
+.peers:not(.wait):empty:before { opacity: 0.25; content: 'Nobody\'s here :('; }
+
+.messages, .peers { pointer-events: none; }
+.controls { z-index: 2; }
